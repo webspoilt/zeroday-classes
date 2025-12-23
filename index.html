@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Privacy Meta Tags -->
+    <meta name="referrer" content="no-referrer">
+    <meta name="author" content="zeroday">
+    <meta name="description" content="Zeroday Classes - Privacy-focused educational resources and downloads.">
+
+    <!-- Content Security Policy - Blocks all external connections for maximum privacy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; object-src 'none'; frame-ancestors 'none';">
+
+    <title>Zeroday Classes - Anonymous & Private</title>
+
+    <style>
+        /* System Fonts Only - No External Fonts */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            background-color: #ffffff;
+            color: #111827;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Layout Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Section */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .logo svg {
+            width: 40px;
+            height: 40px;
+            fill: #2563eb;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .privacy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #ecfdf5;
+            color: #059669;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+
+        .privacy-badge svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin-top: 8px;
+        }
+
+        /* Search Section */
+        .search-section {
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-color: #fafafa;
+        }
+
+        .search-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background-color: #ffffff;
+        }
+
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 16px;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* File List */
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .file-card {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background-color: #ffffff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .file-card:hover {
+            border-color: #2563eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .file-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background-color: #f3f4f6;
+            border-radius: 8px;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .file-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: #6b7280;
+        }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .video-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #111827;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .file-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .download-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .download-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            fill: #d1d5db;
+            margin-bottom: 16px;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 50px;
+            padding: 30px 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+
+        .privacy-list {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .privacy-list span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        .privacy-list svg {
+            width: 14px;
+            height: 14px;
+            fill: #10b981;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 16px;
+            }
+
+            header {
+                padding: 30px 16px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .file-card {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px;
+            }
+
+            .file-icon {
+                margin-bottom: 12px;
+            }
+
+            .file-info {
+                width: 100%;
+                margin-bottom: 12px;
+            }
+
+            .file-meta {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .file-name {
+                max-width: 100%;
+            }
+
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 12px;
+            }
+
+            .privacy-list {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* No Results Animation */
+        .no-results {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <!-- Shield Icon SVG -->
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                </svg>
+                <h1>Zeroday Classes</h1>
+            </div>
+            <p class="subtitle">Secure files for your learning journey</p>
+            <div class="privacy-badge">
+                <!-- Check Icon SVG -->
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                100% Private & Anonymous
+            </div>
+        </header>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <input
+                type="text"
+                class="search-input"
+                id="searchInput"
+                placeholder="Search by video title or file name..."
+                autocomplete="off"
+                spellcheck="false"
+            >
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <span id="fileCount">0 files available</span>
+            <span>No tracking • No cookies</span>
+        </div>
+
+        <!-- File List -->
+        <div class="file-list" id="fileList">
+            <!-- Files will be dynamically inserted here -->
+        </div>
+
+        <!-- Empty State (hidden by default) -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <!-- Search Icon SVG -->
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <p>No files found matching your search</p>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p class="footer-text">Your privacy is protected. No data is collected or stored.</p>
+            <div class="privacy-list">
+                <span>
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    No Analytics
+                </span>
+                <span>
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    No Cookies
+                </span>
+                <span>
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    No Tracking
+                </span>
+                <span>
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    Open Source
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // =====================================================
+        // FILE DATA - ADD YOUR FILES HERE
+        // Format: { videoTitle: "Video Title", fileName: "actual-filename.pdf", fileSize: "2.4 MB", path: "./files/filename.pdf" }
+        // =====================================================
+        const files = [
+            // Example entries - Replace with your actual files
+            {
+                videoTitle: "Introduction to Programming - Lesson 1",
+                fileName: "lesson-1-intro.zip",
+                fileSize: "15.2 MB",
+                path: "./files/lesson-1-intro.zip"
+            },
+            {
+                videoTitle: "Python Basics - Variables and Data Types",
+                fileName: "python-basics.pdf",
+                fileSize: "3.1 MB",
+                path: "./files/python-basics.pdf"
+            },
+            {
+                videoTitle: "Web Development Fundamentals",
+                fileName: "web-dev-notes.docx",
+                fileSize: "1.8 MB",
+                path: "./files/web-dev-notes.docx"
+            },
+            {
+                videoTitle: "Mathematics for Machine Learning",
+                fileName: "ml-math-handbook.pdf",
+                fileSize: "8.5 MB",
+                path: "./files/ml-math-handbook.pdf"
+            },
+            {
+                videoTitle: "Data Structures and Algorithms",
+                fileName: "dsa-cheatsheet.pdf",
+                fileSize: "2.2 MB",
+                path: "./files/dsa-cheatsheet.pdf"
+            }
+            // Add more files below following the same format:
+            // ,
+            // {
+            //     videoTitle: "Your Video Title Here",
+            //     fileName: "your-file.pdf",
+            //     fileSize: "1.0 MB",
+            //     path: "./files/your-file.pdf"
+            // }
+        ];
+
+        // =====================================================
+        // APPLICATION LOGIC - NO EXTERNAL DEPENDENCIES
+        // =====================================================
+
+        // DOM Elements
+        const fileList = document.getElementById('fileList');
+        const searchInput = document.getElementById('searchInput');
+        const fileCount = document.getElementById('fileCount');
+        const emptyState = document.getElementById('emptyState');
+
+        // Render file cards
+        function renderFiles(filesToRender) {
+            // Update count
+            fileCount.textContent = `${filesToRender.length} file${filesToRender.length !== 1 ? 's' : ''} available`;
+
+            // Clear current list
+            fileList.innerHTML = '';
+
+            // Show empty state if no files
+            if (filesToRender.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            // Hide empty state
+            emptyState.style.display = 'none';
+
+            // Create file cards
+            filesToRender.forEach(file => {
+                const card = document.createElement('div');
+                card.className = 'file-card';
+                card.innerHTML = `
+                    <div class="file-icon">
+                        <!-- File Icon SVG -->
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                        </svg>
+                    </div>
+                    <div class="file-info">
+                        <div class="video-title" title="${escapeHtml(file.videoTitle)}">${escapeHtml(file.videoTitle)}</div>
+                        <div class="file-meta">
+                            <span class="file-name" title="${escapeHtml(file.fileName)}">${escapeHtml(file.fileName)}</span>
+                            <span>${escapeHtml(file.fileSize)}</span>
+                        </div>
+                    </div>
+                    <a href="${escapeHtml(file.path)}" class="download-btn" download="${escapeHtml(file.fileName)}" rel="noopener noreferrer">
+                        <!-- Download Icon SVG -->
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                        Download
+                    </a>
+                `;
+                fileList.appendChild(card);
+            });
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Filter files based on search input
+        function filterFiles(searchTerm) {
+            const term = searchTerm.toLowerCase().trim();
+
+            if (!term) {
+                return files;
+            }
+
+            return files.filter(file =>
+                file.videoTitle.toLowerCase().includes(term) ||
+                file.fileName.toLowerCase().includes(term)
+            );
+        }
+
+        // Search input event listener
+        searchInput.addEventListener('input', (e) => {
+            const filteredFiles = filterFiles(e.target.value);
+            renderFiles(filteredFiles);
+        });
+
+        // Prevent form submission on enter key
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+
+        // Initial render
+        renderFiles(files);
+    </script>
+</body>
+</html>

@@ -1,19 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
-import { JOB_DATA, JobPost } from '@/data/jobs';
+import React, { useState, useEffect } from 'react';
+import { JobPost } from '@/data/jobs';
+import { getJobs } from '@/lib/job-store';
 import JobCard from '@/components/Jobs/JobCard';
 import { Filter, Search, Briefcase } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const CATEGORIES = ['All', 'OSSC', 'OPSC', 'Railway', 'Bank', 'Police'];
 
 export default function OdishaJobsPage() {
+    const [allJobs, setAllJobs] = useState<JobPost[]>([]);
     const [filterCategory, setFilterCategory] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
 
+    useEffect(() => {
+        setAllJobs(getJobs());
+    }, []);
+
     // Filter Logic
-    const filteredJobs = JOB_DATA.filter(job => {
+    const filteredJobs = allJobs.filter(job => {
         const matchesCategory = filterCategory === 'All' || job.category === filterCategory;
         const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             job.organization.toLowerCase().includes(searchQuery.toLowerCase());

@@ -69,12 +69,13 @@ export default function SeedPage() {
 
                 // Full-Length Test
                 log('  → Creating full-length test...');
-                const { data: fullTest, error: ftErr } = await supabase
+                const { data: fullTestData, error: ftErr } = await supabase
                     .from('mock_tests')
                     .insert({ title: 'OSSC CGL Full Mock Test 1', type: 'full', time_limit: 120, negative_marking: 0.25, is_locked: false })
-                    .select()
-                    .single();
-                if (ftErr || !fullTest) throw new Error(`Full test insert failed: ${ftErr?.message}`);
+                    .select();
+
+                if (ftErr || !fullTestData || fullTestData.length === 0) throw new Error(`Full test insert failed: ${ftErr?.message || 'No data returned'}`);
+                const fullTest = fullTestData[0];
 
                 const fullQRows = allQuestions.map((q, i) => ({
                     test_id: fullTest.id,
@@ -98,12 +99,16 @@ export default function SeedPage() {
                     if (!meta) continue;
                     log(`  → Creating ${meta.subject} test...`);
 
-                    const { data: subTest, error: stErr } = await supabase
+                    const { data: subTestData, error: stErr } = await supabase
                         .from('mock_tests')
                         .insert({ title: meta.title, type: 'subject', subject: meta.subject, time_limit: meta.time, negative_marking: 0.25, is_locked: false })
-                        .select()
-                        .single();
-                    if (stErr || !subTest) throw new Error(`Subject test insert failed: ${stErr?.message}`);
+                        .select();
+
+                    if (stErr || !subTestData || subTestData.length === 0) {
+                        log(`⚠️ Skipped ${meta.subject}: ${stErr?.message || 'No data'}`);
+                        continue;
+                    }
+                    const subTest = subTestData[0];
 
                     const qArr = (questions as Array<{ question: string; options: string[]; correct: number; explanation?: string }>);
                     const subQRows = qArr.map((q, i) => ({

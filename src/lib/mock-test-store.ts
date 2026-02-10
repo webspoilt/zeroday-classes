@@ -1,15 +1,15 @@
-// localStorage-based Mock Test data store
-// Admin creates tests here, frontend reads from it
+// Supabase-backed Mock Test data store
+// Replaces localStorage with persistent PostgreSQL via Supabase
 
-import COMPLETE_QUESTION_BANK from '@/data/ossc-cgl';
+import { supabase } from './supabase';
 
-// ─── Types ─────────────────────────────────────────────
+// ─── Types ──────────────────────────────────────
 export interface Question {
     id: string;
     question: string;
     options: string[];
     correct: number;
-    explanation: string;
+    explanation?: string;
 }
 
 export interface MockTest {
@@ -17,172 +17,201 @@ export interface MockTest {
     title: string;
     type: 'full' | 'subject' | 'premium';
     subject?: string;
-    timeLimit: number;       // minutes
-    negativeMarking: number; // e.g. 0.25
+    timeLimit: number;
+    negativeMarking: number;
     questions: Question[];
     isLocked: boolean;
     createdAt: string;
 }
 
-const STORE_KEY = 'zeroday_mock_tests';
-const SEEDED_KEY = 'zeroday_mock_tests_seeded';
+// ─── DB Row Types ───────────────────────────────
+interface TestRow {
+    id: string;
+    title: string;
+    type: string;
+    subject: string | null;
+    time_limit: number;
+    negative_marking: number;
+    is_locked: boolean;
+    created_at: string;
+}
 
-// ─── Seed default tests from existing question bank ────
-function buildDefaultTests(): MockTest[] {
-    const subjects = [
-        { key: 'MATH', label: 'Mathematics', id: 'subject-math' },
-        { key: 'REASONING', label: 'Reasoning', id: 'subject-reasoning' },
-        { key: 'DI', label: 'Data Interpretation', id: 'subject-di' },
-        { key: 'COMPUTER', label: 'Computer Knowledge', id: 'subject-computer' },
-        { key: 'ODISHA_GK', label: 'Odisha GK', id: 'subject-odisha-gk' },
-        { key: 'CURRENT_AFFAIRS', label: 'Current Affairs', id: 'subject-current-affairs' },
-    ];
+interface QuestionRow {
+    id: string;
+    test_id: string;
+    question: string;
+    options: string[];
+    correct: number;
+    explanation: string | null;
+    sort_order: number;
+}
 
-    // Full mock test with all questions
-    const allQuestions: Question[] = [];
-    for (const s of subjects) {
-        const bank = COMPLETE_QUESTION_BANK[s.key as keyof typeof COMPLETE_QUESTION_BANK] as Question[];
-        allQuestions.push(...bank);
+// ─── Mappers ────────────────────────────────────
+function rowToTest(row: TestRow, questions: Question[]): MockTest {
+    return {
+        id: row.id,
+        title: row.title,
+        type: row.type as MockTest['type'],
+        subject: row.subject ?? undefined,
+        timeLimit: row.time_limit,
+        negativeMarking: row.negative_marking,
+        questions,
+        isLocked: row.is_locked,
+        createdAt: row.created_at,
+    };
+}
+
+function rowToQuestion(row: QuestionRow): Question {
+    return {
+        id: row.id,
+        question: row.question,
+        options: row.options,
+        correct: row.correct,
+        explanation: row.explanation ?? undefined,
+    };
+}
+
+// ─── Get All Tests ──────────────────────────────
+export async function getMockTests(): Promise<MockTest[]> {
+    const { data: tests, error: tErr } = await supabase
+        .from('mock_tests')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+    if (tErr || !tests) {
+        console.error('Error fetching mock tests:', tErr);
+        return [];
     }
 
-    const fullTest: MockTest = {
-        id: 'ossc-cgl-full-1',
-        title: 'OSSC CGL Full Mock Test 1',
-        type: 'full',
-        timeLimit: 120,
-        negativeMarking: 0.25,
-        questions: allQuestions,
-        isLocked: false,
-        createdAt: new Date().toISOString(),
-    };
+    const { data: allQs, error: qErr } = await supabase
+        .from('questions')
+        .select('*')
+        .order('sort_order', { ascending: true });
 
-    // Subject-wise tests
-    const subjectTests: MockTest[] = subjects.map(s => {
-        const questions = COMPLETE_QUESTION_BANK[s.key as keyof typeof COMPLETE_QUESTION_BANK] as Question[];
-        return {
-            id: s.id,
-            title: `${s.label} Practice`,
-            type: 'subject' as const,
-            subject: s.label,
-            timeLimit: 30,
-            negativeMarking: 0,
-            questions,
-            isLocked: false,
-            createdAt: new Date().toISOString(),
-        };
+    if (qErr) console.error('Error fetching questions:', qErr);
+
+    const questionsMap = new Map<string, Question[]>();
+    (allQs || []).forEach((qRow: QuestionRow) => {
+        const arr = questionsMap.get(qRow.test_id) || [];
+        arr.push(rowToQuestion(qRow));
+        questionsMap.set(qRow.test_id, arr);
     });
 
-    // Premium placeholder tests
-    const premiumTests: MockTest[] = [
-        {
-            id: 'premium-ossc-cgl-2',
-            title: 'OSSC CGL Mock Test 2 (Premium)',
-            type: 'premium',
-            timeLimit: 120,
-            negativeMarking: 0.25,
-            questions: [],
-            isLocked: true,
-            createdAt: new Date().toISOString(),
-        },
-        {
-            id: 'premium-osssc-ri',
-            title: 'OSSSC RI Mock Test (Premium)',
-            type: 'premium',
-            timeLimit: 90,
-            negativeMarking: 0.25,
-            questions: [],
-            isLocked: true,
-            createdAt: new Date().toISOString(),
-        },
-    ];
-
-    return [fullTest, ...subjectTests, ...premiumTests];
+    return tests.map((t: TestRow) => rowToTest(t, questionsMap.get(t.id) || []));
 }
 
-// ─── Store Operations ──────────────────────────────────
-function ensureSeeded() {
-    if (typeof window === 'undefined') return;
-    const seeded = localStorage.getItem(SEEDED_KEY);
-    if (!seeded) {
-        const defaults = buildDefaultTests();
-        localStorage.setItem(STORE_KEY, JSON.stringify(defaults));
-        localStorage.setItem(SEEDED_KEY, 'true');
+// ─── Get Single Test ────────────────────────────
+export async function getMockTestById(id: string): Promise<MockTest | null> {
+    const { data: test, error: tErr } = await supabase
+        .from('mock_tests')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (tErr || !test) return null;
+
+    const { data: qs } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('test_id', id)
+        .order('sort_order', { ascending: true });
+
+    return rowToTest(test, (qs || []).map(rowToQuestion));
+}
+
+// ─── Add Test ───────────────────────────────────
+export async function addMockTest(test: Omit<MockTest, 'id' | 'createdAt'>): Promise<MockTest | null> {
+    const { data, error } = await supabase
+        .from('mock_tests')
+        .insert({
+            title: test.title,
+            type: test.type,
+            subject: test.subject ?? null,
+            time_limit: test.timeLimit,
+            negative_marking: test.negativeMarking,
+            is_locked: test.isLocked,
+        })
+        .select()
+        .single();
+
+    if (error || !data) {
+        console.error('Error adding test:', error);
+        return null;
     }
+    return rowToTest(data, []);
 }
 
-export function getMockTests(): MockTest[] {
-    if (typeof window === 'undefined') return buildDefaultTests();
-    ensureSeeded();
-    try {
-        const stored = localStorage.getItem(STORE_KEY);
-        if (stored) return JSON.parse(stored);
-    } catch { /* ignore */ }
-    return buildDefaultTests();
+// ─── Update Test ────────────────────────────────
+export async function updateMockTest(id: string, updates: Partial<MockTest>): Promise<boolean> {
+    const dbUpdates: Record<string, unknown> = {};
+    if (updates.title !== undefined) dbUpdates.title = updates.title;
+    if (updates.type !== undefined) dbUpdates.type = updates.type;
+    if (updates.subject !== undefined) dbUpdates.subject = updates.subject;
+    if (updates.timeLimit !== undefined) dbUpdates.time_limit = updates.timeLimit;
+    if (updates.negativeMarking !== undefined) dbUpdates.negative_marking = updates.negativeMarking;
+    if (updates.isLocked !== undefined) dbUpdates.is_locked = updates.isLocked;
+
+    const { error } = await supabase.from('mock_tests').update(dbUpdates).eq('id', id);
+    if (error) console.error('Error updating test:', error);
+    return !error;
 }
 
-export function getMockTestById(id: string): MockTest | undefined {
-    return getMockTests().find(t => t.id === id);
+// ─── Delete Test ────────────────────────────────
+export async function deleteMockTest(id: string): Promise<boolean> {
+    // Questions cascade-deleted via FK
+    const { error } = await supabase.from('mock_tests').delete().eq('id', id);
+    if (error) console.error('Error deleting test:', error);
+    return !error;
 }
 
-export function saveMockTests(tests: MockTest[]) {
-    localStorage.setItem(STORE_KEY, JSON.stringify(tests));
-}
+// ─── Add Question ───────────────────────────────
+export async function addQuestionToTest(testId: string, q: Omit<Question, 'id'>): Promise<Question | null> {
+    // Get highest sort_order for this test
+    const { data: lastQ } = await supabase
+        .from('questions')
+        .select('sort_order')
+        .eq('test_id', testId)
+        .order('sort_order', { ascending: false })
+        .limit(1);
 
-export function addMockTest(test: Omit<MockTest, 'id' | 'createdAt'>): MockTest {
-    const tests = getMockTests();
-    const newTest: MockTest = {
-        ...test,
-        id: `test_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        createdAt: new Date().toISOString(),
-    };
-    tests.push(newTest);
-    saveMockTests(tests);
-    return newTest;
-}
+    const nextOrder = lastQ && lastQ.length > 0 ? (lastQ[0].sort_order || 0) + 1 : 0;
 
-export function updateMockTest(id: string, updates: Partial<MockTest>) {
-    const tests = getMockTests();
-    const idx = tests.findIndex(t => t.id === id);
-    if (idx !== -1) {
-        tests[idx] = { ...tests[idx], ...updates };
-        saveMockTests(tests);
+    const { data, error } = await supabase
+        .from('questions')
+        .insert({
+            test_id: testId,
+            question: q.question,
+            options: q.options,
+            correct: q.correct,
+            explanation: q.explanation || '',
+            sort_order: nextOrder,
+        })
+        .select()
+        .single();
+
+    if (error || !data) {
+        console.error('Error adding question:', error);
+        return null;
     }
+    return rowToQuestion(data);
 }
 
-export function deleteMockTest(id: string) {
-    const tests = getMockTests().filter(t => t.id !== id);
-    saveMockTests(tests);
+// ─── Update Question ────────────────────────────
+export async function updateQuestionInTest(_testId: string, questionId: string, updates: Partial<Question>): Promise<boolean> {
+    const dbUpdates: Record<string, unknown> = {};
+    if (updates.question !== undefined) dbUpdates.question = updates.question;
+    if (updates.options !== undefined) dbUpdates.options = updates.options;
+    if (updates.correct !== undefined) dbUpdates.correct = updates.correct;
+    if (updates.explanation !== undefined) dbUpdates.explanation = updates.explanation;
+
+    const { error } = await supabase.from('questions').update(dbUpdates).eq('id', questionId);
+    if (error) console.error('Error updating question:', error);
+    return !error;
 }
 
-// Question-level operations on a specific test
-export function addQuestionToTest(testId: string, question: Omit<Question, 'id'>): Question {
-    const tests = getMockTests();
-    const test = tests.find(t => t.id === testId);
-    if (!test) throw new Error('Test not found');
-    const newQ: Question = {
-        ...question,
-        id: `q_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
-    };
-    test.questions.push(newQ);
-    saveMockTests(tests);
-    return newQ;
-}
-
-export function updateQuestionInTest(testId: string, questionId: string, updates: Partial<Question>) {
-    const tests = getMockTests();
-    const test = tests.find(t => t.id === testId);
-    if (!test) return;
-    const qi = test.questions.findIndex(q => q.id === questionId);
-    if (qi !== -1) {
-        test.questions[qi] = { ...test.questions[qi], ...updates };
-        saveMockTests(tests);
-    }
-}
-
-export function deleteQuestionFromTest(testId: string, questionId: string) {
-    const tests = getMockTests();
-    const test = tests.find(t => t.id === testId);
-    if (!test) return;
-    test.questions = test.questions.filter(q => q.id !== questionId);
-    saveMockTests(tests);
+// ─── Delete Question ────────────────────────────
+export async function deleteQuestionFromTest(_testId: string, questionId: string): Promise<boolean> {
+    const { error } = await supabase.from('questions').delete().eq('id', questionId);
+    if (error) console.error('Error deleting question:', error);
+    return !error;
 }

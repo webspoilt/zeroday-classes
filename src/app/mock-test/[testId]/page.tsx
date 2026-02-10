@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getMockTestById, MockTest, Question } from '@/lib/mock-test-store';
 import { NavBar } from '@/components/NavBar';
@@ -97,23 +97,7 @@ function QuizInterface({ test, userName, onComplete }: { test: MockTest; userNam
     const answersRef = useRef(answers);
     useEffect(() => { answersRef.current = answers; }, [answers]);
 
-    // Timer
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(interval);
-                    handleSubmit();
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-        return () => clearInterval(interval);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const handleSubmit = () => {
+    const handleSubmit = useCallback(() => {
         if (submitted) return;
         setSubmitted(true);
 
@@ -139,7 +123,22 @@ function QuizInterface({ test, userName, onComplete }: { test: MockTest; userNam
             answers: currentAnswers,
             questions,
         });
-    };
+    }, [submitted, questions, test.negativeMarking, onComplete, totalTime, timeLeft]);
+
+    // Timer
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    handleSubmit();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [handleSubmit]);
 
     const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
@@ -163,7 +162,6 @@ function QuizInterface({ test, userName, onComplete }: { test: MockTest; userNam
                         <Send className="w-4 h-4" /> Submit
                     </button>
                 </div>
-                {/* Progress bar */}
                 <div className="max-w-7xl mx-auto mt-2">
                     <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
                         <div className={cn("h-full transition-all duration-1000", isLowTime ? "bg-red-500" : "bg-primary")} style={{ width: `${timePercent}%` }} />
@@ -265,7 +263,6 @@ function ResultsView({ test, result, onRetry }: { test: MockTest; result: TestRe
                     <p className="text-slate-400">{test.title}</p>
                 </motion.div>
 
-                {/* Score Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <div className="glass-card rounded-xl p-5 text-center border border-white/10">
                         <div className="text-3xl font-bold text-white">{result.score.toFixed(1)}</div>
@@ -296,7 +293,6 @@ function ResultsView({ test, result, onRetry }: { test: MockTest; result: TestRe
                     </div>
                 </div>
 
-                {/* Answer Review */}
                 <div className="glass-card rounded-2xl p-6 border border-white/10 mb-8">
                     <h3 className="text-lg font-bold text-white mb-4">Answer Review</h3>
                     <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
@@ -328,7 +324,6 @@ function ResultsView({ test, result, onRetry }: { test: MockTest; result: TestRe
                     </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-4 justify-center">
                     <button onClick={onRetry} className="px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all">
                         🔄 Retry Test
@@ -357,14 +352,14 @@ export default function DynamicTestPage() {
     useEffect(() => {
         // Skip for the hardcoded ossc-cgl route
         if (testId === 'ossc-cgl' || testId === 'odisha-history') {
-            router.replace(`/mock-test/${testId}`);
             return;
         }
-        const found = getMockTestById(testId);
-        if (found && !found.isLocked && found.questions.length > 0) {
-            setTest(found);
-        }
-        setLoading(false);
+        getMockTestById(testId).then(found => {
+            if (found && !found.isLocked && found.questions.length > 0) {
+                setTest(found);
+            }
+            setLoading(false);
+        });
     }, [testId, router]);
 
     if (loading) {

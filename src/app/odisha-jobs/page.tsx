@@ -16,7 +16,7 @@ export default function OdishaJobsPage() {
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        setAllJobs(getJobs());
+        getJobs().then(setAllJobs);
     }, []);
 
     // Filter Logic

@@ -26,6 +26,23 @@ console.log("Supabase Client Initialized");
         console.log("Job Data Length:", JOB_DATA.length);
         console.log("Question Bank Keys:", Object.keys(COMPLETE_QUESTION_BANK));
 
+        console.log("Attempting test insert...");
+        const { data: insertData, error: insertError } = await supabase.from('job_posts').insert([{
+            title: 'Test Seed Job',
+            organization: 'Test Org',
+            post_date: new Date().toISOString(),
+            last_date: new Date().toISOString(),
+            category: 'OSSC',
+            apply_link: 'https://example.com',
+            is_new: false
+        }]).select();
+
+        if (insertError) {
+            console.error("Insert Error Full Object:", JSON.stringify(insertError, null, 2));
+        } else {
+            console.log("Insert Success:", insertData);
+        }
+
         const { count, error } = await supabase.from('job_posts').select('*', { count: 'exact', head: true });
         if (error) {
             console.error("Select Error:", error);

@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "question": "When was the state of Odisha formed (Utkal Divas)?",
+    "options": ["1st April 1936", "1st April 1947", "15th August 1947", "26th January 1950"],
+    "answer": "1st April 1936"
+  },
+  {
+    "id": 2,
+    "question": "Who was the first Chief Minister of Odisha?",
+    "options": ["Biju Patnaik", "Harekrushna Mahatab", "Nabakrushna Choudhury", "Nilamani Routray"],
+    "answer": "Harekrushna Mahatab"
+  },
+  {
+    "id": 3,
+    "question": "Which king built the Konark Sun Temple?",
+    "options": ["Anantavarman Chodaganga", "Narasimhadeva I", "Kapilendradeva", "Purushottamadeva"],
+    "answer": "Narasimhadeva I"
+  },
+  {
+    "id": 4,
+    "question": "What was the capital of Odisha before Bhubaneswar?",
+    "options": ["Puri", "Cuttack", "Berhampur", "Sambalpur"],
+    "answer": "Cuttack"
+  },
+  {
+    "id": 5,
+    "question": "Which river is known as the lifeline of Odisha?",
+    "options": ["Brahmani", "Mahanadi", "Baitarani", "Subarnarekha"],
+    "answer": "Mahanadi"
+  },
+  {
+    "id": 6,
+    "question": "Who wrote 'Vande Utkala Janani'?",
+    "options": ["Fakir Mohan Senapati", "Lakshminath Bezbaroa", "Kantakabi Laxmikanta Mohapatra", "Radhanath Ray"],
+    "answer": "Kantakabi Laxmikanta Mohapatra"
+  },
+  {
+    "id": 7,
+    "question": "The Kalinga War was fought in which year?",
+    "options": ["261 BC", "265 BC", "270 BC", "273 BC"],
+    "answer": "261 BC"
+  },
+  {
+    "id": 8,
+    "question": "Which temple is known as 'Black Pagoda'?",
+    "options": ["Jagannath Temple", "Lingaraj Temple", "Konark Sun Temple", "Mukteswar Temple"],
+    "answer": "Konark Sun Temple"
+  },
+  {
+    "id": 9,
+    "question": "Which temple is known as 'White Pagoda'?",
+    "options": ["Jagannath Temple", "Lingaraj Temple", "Konark Sun Temple", "Rajarani Temple"],
+    "answer": "Jagannath Temple"
+  },
+  {
+    "id": 10,
+    "question": "Who was the last independent Hindu king of Odisha?",
+    "options": ["Mukundadeva", "Prataparudradeva", "Kapilendradeva", "Purushottamadeva"],
+    "answer": "Mukundadeva"
+  },
+  {
+    "id": 11,
+    "question": "Which famous poet is known as 'Kabi Samrat'?",
+    "options": ["Upendra Bhanja", "Baladev Rath", "Radhanath Ray", "Gopabandhu Das"],
+    "answer": "Upendra Bhanja"
+  },
+  {
+    "id": 12,
+    "question": "Similipal National Park is located in which district?",
+    "options": ["Keonjhar", "Mayurbhanj", "Balasore", "Sundargarh"],
+    "answer": "Mayurbhanj"
+  },
+  {
+    "id": 13,
+    "question": "Chilika Lake was designated as the first Indian wetland of international importance under which convention?",
+    "options": ["Ramsar Convention", "Stockholm Convention", "Bonn Convention", "Vienna Convention"],
+    "answer": "Ramsar Convention"
+  },
+  {
+    "id": 14,
+    "question": "Who formed the Utkal Sammilani?",
+    "options": ["Gopabandhu Das", "Madhusudan Das", "Harekrushna Mahatab", "Krushna Chandra Gajapati"],
+    "answer": "Madhusudan Das"
+  },
+  {
+    "id": 15,
+    "question": "When did Buddhism spread in Odisha?",
+    "options": ["After Kalinga War", "During Gupta Period", "During Mughal Period", "During British Rule"],
+    "answer": "After Kalinga War"
+  },
+  {
+    "id": 16,
+    "question": "The Jagannath Temple at Puri was built by which dynasty?",
+    "options": ["Ganga Dynasty", "Suryavamsi Gajapati Dynasty", "Somavamsi Dynasty", "Bhauma-Kara Dynasty"],
+    "answer": "Ganga Dynasty"
+  },
+  {
+    "id": 17,
+    "question": "Which river flows through Rourkela?",
+    "options": ["Mahanadi", "Brahmani", "Koel", "Ib"],
+    "answer": "Brahmani"
+  },
+  {
+    "id": 18,
+    "question": "The Hirakud Dam is built on which river?",
+    "options": ["Mahanadi", "Brahmani", "Baitarani", "Rushikulya"],
+    "answer": "Mahanadi"
+  },
+  {
+    "id": 19,
+    "question": "Who is known as the 'Grand Old Man of Odisha'?",
+    "options": ["Gopabandhu Das", "Madhusudan Das", "Fakir Mohan Senapati", "Gourishankar Ray"],
+    "answer": "Madhusudan Das"
+  },
+  {
+    "id": 20,
+    "question": "Which district of Odisha has the highest literacy rate?",
+    "options": ["Khordha", "Cuttack", "Puri", "Jagatsinghpur"],
+    "answer": "Khordha"
+  }
+]

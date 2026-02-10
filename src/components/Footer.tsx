@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { Youtube } from "lucide-react";
+
 export const Footer = () => {
     return (
         <footer className="border-t border-white/10 bg-background/50 backdrop-blur-lg mt-20">
@@ -5,38 +8,37 @@ export const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="md:col-span-2">
                         <h2 className="text-2xl font-bold font-heading mb-4">ZERODAY<span className="text-primary">.</span></h2>
-                        <p className="text-muted-foreground max-w-sm">
-                            Master the art of ethical hacking and cybersecurity. Join the elite community of security researchers.
+                        <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
+                            Free Odisha exam preparation, government job alerts, and coding tutorials. Part of the ZeroDay Classes YouTube channel.
                         </p>
+                        <a href="https://youtube.com/@zerodayclasses" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 mt-4 text-red-400 hover:text-red-300 font-medium text-sm transition-colors">
+                            <Youtube className="w-4 h-4" /> YouTube Channel
+                        </a>
                     </div>
 
                     <div>
-                        <h3 className="font-bold mb-4 text-foreground">Platform</h3>
+                        <h3 className="font-bold mb-4 text-foreground">Quick Links</h3>
                         <ul className="space-y-2 text-muted-foreground text-sm">
-                            <li><a href="#" className="hover:text-primary transition-colors">Courses</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors">Career Path</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors">Certificates</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors">Mock Tests</a></li>
+                            <li><Link href="/mock-test/ossc-cgl" className="hover:text-primary transition-colors">OSSC CGL Mock Test</Link></li>
+                            <li><Link href="/odisha-jobs" className="hover:text-primary transition-colors">Odisha Job Alerts</Link></li>
+                            <li><Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
+                            <li><Link href="/admin/login" className="hover:text-primary transition-colors">Admin Panel</Link></li>
                         </ul>
                     </div>
 
                     <div>
-                        <h3 className="font-bold mb-4 text-foreground">Community</h3>
+                        <h3 className="font-bold mb-4 text-foreground">Connect</h3>
                         <ul className="space-y-2 text-muted-foreground text-sm">
-                            <li><a href="#" className="hover:text-primary transition-colors">Discord</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors">Twitter / X</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors">LinkedIn</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors">GitHub</a></li>
+                            <li><a href="https://youtube.com/@zerodayclasses" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">YouTube</a></li>
+                            <li><a href="https://t.me/zerodayclasses" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Telegram</a></li>
+                            <li><a href="mailto:heyzerodayhere@gmail.com" className="hover:text-primary transition-colors">Email Us</a></li>
                         </ul>
                     </div>
                 </div>
 
                 <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
                     <p>© {new Date().getFullYear()} ZeroDay Classes. All rights reserved.</p>
-                    <div className="flex space-x-6 mt-4 md:mt-0">
-                        <a href="#" className="hover:text-foreground">Privacy</a>
-                        <a href="#" className="hover:text-foreground">Terms</a>
-                    </div>
+                    <p className="mt-2 md:mt-0">Made with ❤️ for Odisha aspirants</p>
                 </div>
             </div>
         </footer>

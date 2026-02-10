@@ -6,8 +6,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-  title: "ZeroDay Classes",
-  description: "Master Zero-Day vulnerabilities before they happen.",
+  title: "ZeroDay Classes — Odisha Exam Prep & Coding",
+  description: "Free OSSC CGL mock tests, Odisha government job alerts, and coding tutorials. Prepare smarter with ZeroDay Classes.",
 };
 
 export default function RootLayout({

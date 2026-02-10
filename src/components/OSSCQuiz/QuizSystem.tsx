@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Timer, AlertCircle, ChevronRight, ChevronLeft, Flag, Send, Download, Trophy, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -8,9 +8,7 @@ import COMPLETE_QUESTION_BANK from '../../data/ossc-cgl';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-
-// If you don't have a Button component, I will use standard HTML button elements with Tailwind classes.
-// For now, I'll stick to standard elements to avoid dependency issues if Shadcn components aren't fully set up.
+import confetti from 'canvas-confetti';
 
 const SECTIONS = {
     MATH: { name: 'Quantitative Aptitude', count: 30, time: 24, id: 'MATH' },
@@ -167,15 +165,24 @@ const QuizInterface = ({ userName, onComplete }: { userName: string; onComplete:
     const [questions] = useState(generateFullQuestionSet());
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<number, number>>({});
+    const answersRef = useRef<Record<number, number>>({}); // Ref to track answers without causing re-renders in timer
+
     const [markedForReview, setMarkedForReview] = useState(new Set<number>());
     const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
+    // Sync ref with state
+    useEffect(() => {
+        answersRef.current = answers;
+    }, [answers]);
+
     // Timer effect
     useEffect(() => {
-        if (timeLeft <= 0 && !isSubmitted) {
-            handleAutoSubmit();
+        if (isSubmitted) return;
+
+        if (timeLeft <= 0) {
+            calculateAndSubmit(); // Now safe to call directly as it uses ref
             return;
         }
 
@@ -187,38 +194,26 @@ const QuizInterface = ({ userName, onComplete }: { userName: string; onComplete:
         window.addEventListener('beforeunload', handleBeforeUnload);
 
         const timer = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    return 0;
-                }
-                return prev - 1;
-            });
+            setTimeLeft(prev => prev - 1);
         }, 1000);
 
         return () => {
             clearInterval(timer);
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [timeLeft, isSubmitted]);
 
-    // Handle Auto Submit
-    const handleAutoSubmit = useCallback(() => {
-        setIsSubmitted(true);
-        // Use a timeout to break the render cycle or ensure state is updated
-        setTimeout(() => calculateAndSubmit(), 0);
-    }, []); // Remove dependencies to avoid stale closures issues if handled correctly, or include them if needed. 
-    // Better to use refs for latest state if using in callbacks, but here we can just call the function.
-    // Actually, to assume 'answers' is fresh, let's pass it or use functional state updates if possible.
-    // Since calculateAndSubmit reads 'answers', we need to be careful.
-    // Let's make calculateAndSubmit depend on current state.
-
     const calculateAndSubmit = () => {
+        if (isSubmitted) return;
+        setIsSubmitted(true);
+
         let score = 0;
         let correct = 0;
         let wrong = 0;
         let unattempted = 0;
         const sectionWise: any = {};
+        const currentAnswers = answersRef.current; // Use Ref for latest answers
 
         // Initialize section-wise stats
         Object.keys(SECTIONS).forEach(key => {
@@ -227,10 +222,10 @@ const QuizInterface = ({ userName, onComplete }: { userName: string; onComplete:
 
         questions.forEach(q => {
             const section = q.section;
-            if (answers[q.globalIndex] === undefined) {
+            if (currentAnswers[q.globalIndex] === undefined) {
                 unattempted++;
                 sectionWise[section].unattempted++;
-            } else if (answers[q.globalIndex] === q.correct) {
+            } else if (currentAnswers[q.globalIndex] === q.correct) {
                 score += 1;
                 correct++;
                 sectionWise[section].correct++;
@@ -253,7 +248,7 @@ const QuizInterface = ({ userName, onComplete }: { userName: string; onComplete:
             timeTaken: TOTAL_TIME - timeLeft,
             sectionWise,
             timestamp: new Date().toISOString(),
-            answers: answers,
+            answers: currentAnswers,
             questions: questions
         };
 
@@ -261,6 +256,13 @@ const QuizInterface = ({ userName, onComplete }: { userName: string; onComplete:
         const existing = JSON.parse(localStorage.getItem('ossc_cgl_results') || '[]');
         existing.push(result);
         localStorage.setItem('ossc_cgl_results', JSON.stringify(existing));
+
+        // Trigger confetti
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
 
         onComplete(result);
     };
@@ -336,7 +338,7 @@ const QuizInterface = ({ userName, onComplete }: { userName: string; onComplete:
                 {/* Question Panel */}
                 <div className="lg:col-span-3 flex flex-col h-full gap-4">
                     {/* Question Card */}
-                    <div className="glass-card bg-slate-900/50 border border-white/10 rounded-2xl p-6 flex-1 overflow-y-auto relative">
+                    <div className="glass-card bg-slate-900/50 border border-white/10 rounded-2xl p-6 flex-1 overflow-y-auto relative custom-scrollbar">
                         <div className="flex items-center justify-between mb-6 sticky top-0 bg-slate-900/50 backdrop-blur-sm p-2 -mx-2 -mt-2 rounded-lg z-10 border-b border-white/5">
                             <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 uppercase tracking-wider">
                                 {currentQuestion.sectionName}
@@ -441,6 +443,7 @@ const QuizInterface = ({ userName, onComplete }: { userName: string; onComplete:
                             </div>
                         </div>
 
+                        {/* Warning Message */}
                         <div className="space-y-3 mt-4 pt-4 border-t border-white/10 text-xs text-slate-400 font-medium">
                             <div className="flex items-center justify-between">
                                 <span className="flex items-center gap-2"><div className="w-3 h-3 bg-green-500/20 border border-green-500/50 rounded-sm"></div> Answered</span>
@@ -543,7 +546,7 @@ const ResultsView = ({ result, onRetry }: { result: QuizResult; onRetry: () => v
         return `${mins}m ${secs}s`;
     };
 
-    const accuracy = ((result.correct / result.totalQuestions) * 100).toFixed(1);
+    const accuracy = ((result.correct / (Object.keys(result.answers).length || 1)) * 100).toFixed(1);
     const percentage = ((result.score / result.totalQuestions) * 100).toFixed(1);
 
     // Calculate user rank

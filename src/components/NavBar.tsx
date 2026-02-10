@@ -6,7 +6,7 @@ import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
     { href: "/", label: "Home" },
-    { href: "/mock-test/ossc-cgl", label: "OSSC CGL Mock Test" },
+    { href: "/mock-test", label: "Mock Tests" },
     { href: "/odisha-jobs", label: "Odisha Jobs" },
     { href: "/dashboard", label: "Dashboard" },
 ];

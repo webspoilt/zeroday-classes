@@ -22,7 +22,7 @@ export const Footer = () => {
                             <li><Link href="/mock-test/ossc-cgl" className="hover:text-primary transition-colors">OSSC CGL Mock Test</Link></li>
                             <li><Link href="/odisha-jobs" className="hover:text-primary transition-colors">Odisha Job Alerts</Link></li>
                             <li><Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
-                            <li><Link href="/admin/login" className="hover:text-primary transition-colors">Admin Panel</Link></li>
+
                         </ul>
                     </div>
 
@@ -39,6 +39,7 @@ export const Footer = () => {
                 <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
                     <p>© {new Date().getFullYear()} ZeroDay Classes. All rights reserved.</p>
                     <p className="mt-2 md:mt-0">Made with ❤️ for Odisha aspirants</p>
+                    <Link href="/admin/login" className="text-xs text-slate-800 ml-4 hover:text-primary transition-colors">Admin</Link>
                 </div>
             </div>
         </footer>

@@ -11,15 +11,43 @@ model JobPost {
   id           String   @id @default(cuid())
   title        String
   organization String
-  postDate     DateTime @default(now())
-  lastDate     DateTime
+  post_date    DateTime @default(now()) @map("post_date")
+  last_date    DateTime @map("last_date")
   vacancies    Int?
   qualification String?
   category     String
-  applyLink    String
-  notificationPdf String?
-  isNew        Boolean  @default(true)
-  
-  // Optional relations
-  courseId     String?
+  apply_link   String   @map("apply_link")
+  notification_pdf String? @map("notification_pdf")
+  is_new       Boolean  @default(true) @map("is_new")
+  created_at   DateTime @default(now()) @map("created_at")
+
+  @@map("job_posts")
+}
+
+model MockTest {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title            String
+  type             String   @default("full")
+  subject          String?
+  time_limit       Int      @default(120)
+  negative_marking Float    @default(0.25)
+  is_locked        Boolean  @default(false)
+  created_at       DateTime @default(now()) @map("created_at")
+  questions        Question[]
+
+  @@map("mock_tests")
+}
+
+model Question {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  test_id     String   @db.Uuid
+  test        MockTest @relation(fields: [test_id], references: [id], onDelete: Cascade)
+  question    String
+  options     Json     @default("[]")
+  correct     Int      @default(0)
+  explanation String?  @default("")
+  sort_order  Int?     @default(0)
+  created_at  DateTime @default(now()) @map("created_at")
+
+  @@map("questions")
 }

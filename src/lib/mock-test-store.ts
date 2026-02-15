@@ -10,6 +10,7 @@ export interface Question {
     options: string[];
     correct: number;
     explanation?: string;
+    image?: string;
 }
 
 export interface MockTest {
@@ -43,6 +44,7 @@ interface QuestionRow {
     options: string[];
     correct: number;
     explanation: string | null;
+    image: string | null;
     sort_order: number;
 }
 
@@ -68,6 +70,7 @@ function rowToQuestion(row: QuestionRow): Question {
         options: row.options,
         correct: row.correct,
         explanation: row.explanation ?? undefined,
+        image: row.image ?? undefined,
     };
 }
 
@@ -184,6 +187,7 @@ export async function addQuestionToTest(testId: string, q: Omit<Question, 'id'>)
             options: q.options,
             correct: q.correct,
             explanation: q.explanation || '',
+            image: q.image || null,
             sort_order: nextOrder,
         })
         .select()
@@ -203,6 +207,8 @@ export async function updateQuestionInTest(_testId: string, questionId: string, 
     if (updates.options !== undefined) dbUpdates.options = updates.options;
     if (updates.correct !== undefined) dbUpdates.correct = updates.correct;
     if (updates.explanation !== undefined) dbUpdates.explanation = updates.explanation;
+    if (updates.image !== undefined) dbUpdates.image = updates.image;
+
 
     const { error } = await supabase.from('questions').update(dbUpdates).eq('id', questionId);
     if (error) console.error('Error updating question:', error);

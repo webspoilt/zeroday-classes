@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Briefcase, LogOut, Plus, Trash2, Edit3, Save, X,
     CheckCircle, ExternalLink, Shield,
-    Target, Eye, ArrowLeft, Lock, Unlock
+    Target, Eye, ArrowLeft, Lock, Unlock, Image as ImageIcon
 } from 'lucide-react';
 
 const CATEGORIES = ['OSSC', 'OPSC', 'Railway', 'Bank', 'Police', 'Teaching', 'Other'] as const;
@@ -123,11 +123,50 @@ const QuestionForm = ({ initial, onSave, onCancel }: QFormProps) => {
     const [options, setOptions] = useState<string[]>(initial?.options || ['', '', '', '']);
     const [correct, setCorrect] = useState(initial?.correct ?? 0);
     const [explanation, setExplanation] = useState(initial?.explanation || '');
+    const [image, setImage] = useState(initial?.image || '');
+
+    // Load draft from localStorage if not editing an existing question
+    useEffect(() => {
+        if (!initial) {
+            const draft = localStorage.getItem('question_draft');
+            if (draft) {
+                try {
+                    const parsed = JSON.parse(draft);
+                    setQuestion(parsed.question || '');
+                    setOptions(parsed.options || ['', '', '', '']);
+                    setCorrect(parsed.correct ?? 0);
+                    setExplanation(parsed.explanation || '');
+                    setImage(parsed.image || '');
+                } catch (e) {
+                    console.error('Failed to load draft', e);
+                }
+            }
+        }
+    }, [initial]);
+
+    // Save draft to localStorage whenever fields change (debounce slightly or just on change)
+    useEffect(() => {
+        if (!initial) {
+            const draft = { question, options, correct, explanation, image };
+            localStorage.setItem('question_draft', JSON.stringify(draft));
+        }
+    }, [question, options, correct, explanation, image, initial]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (options.some(o => !o.trim())) return alert('All 4 options are required');
-        onSave({ question, options, correct, explanation });
+        onSave({ question, options, correct, explanation, image });
+
+        // Clear draft
+        if (!initial) {
+            localStorage.removeItem('question_draft');
+            // Reset form
+            setQuestion('');
+            setOptions(['', '', '', '']);
+            setCorrect(0);
+            setExplanation('');
+            setImage('');
+        }
     };
 
     return (
@@ -141,6 +180,20 @@ const QuestionForm = ({ initial, onSave, onCancel }: QFormProps) => {
             <div>
                 <label className={labelClass}>Question *</label>
                 <textarea value={question} onChange={(e) => setQuestion(e.target.value)} rows={3} placeholder="Enter the question text..." className={`${inputClass} resize-none`} required />
+            </div>
+
+            <div>
+                <label className={labelClass}>Image URL (Optional)</label>
+                <div className="flex gap-2">
+                    <input type="url" value={image} onChange={(e) => setImage(e.target.value)} placeholder="https://..." className={inputClass} />
+                    {image && (
+                        <div className="w-10 h-10 shrink-0 bg-slate-700 rounded-lg overflow-hidden border border-slate-600">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                        </div>
+                    )}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">Paste a direct link to an image (e.g. from Imgur) for DI/Charts.</p>
             </div>
 
             <div className="space-y-3">
@@ -378,6 +431,12 @@ function MockTestManager({ showToast }: { showToast: (msg: string) => void }) {
                                             <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">Q{i + 1}</span>
                                         </div>
                                         <p className="text-sm font-medium text-white mb-2">{q.question}</p>
+                                        {q.image && (
+                                            <div className="mb-3 max-w-xs rounded-lg overflow-hidden border border-white/10">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={q.image} alt="Question Attachment" className="w-full h-auto" />
+                                            </div>
+                                        )}
                                         <div className="grid grid-cols-2 gap-1 text-xs">
                                             {q.options.map((opt, oi) => (
                                                 <div key={oi} className={`px-2 py-1 rounded ${oi === q.correct ? 'bg-green-500/10 text-green-400 font-bold' : 'text-slate-500'}`}>

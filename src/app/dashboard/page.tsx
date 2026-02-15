@@ -1,5 +1,5 @@
-import { NavBar } from "@/components/NavBar";
-import { Footer } from "@/components/Footer";
+import { NavBar } from "@/components/layout/NavBar";
+import { Footer } from "@/components/layout/Footer";
 import { CourseCard } from "@/components/CourseCard";
 import { Trophy, Target, Clock, Shield } from "lucide-react";
 

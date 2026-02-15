@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getMockTests, MockTest } from '@/lib/mock-test-store';
-import { NavBar } from '@/components/NavBar';
-import { Footer } from '@/components/Footer';
+import { NavBar } from '@/components/layout/NavBar';
+import { Footer } from '@/components/layout/Footer';
 import { Target, Clock, AlertTriangle, Lock, ChevronRight, Sparkles, BookOpen, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 

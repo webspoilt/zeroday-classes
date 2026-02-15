@@ -1,57 +1,29 @@
-# ZeroDay Classes Platform
+# ZeroDay Classes — Odisha Exam Prep Platform
 
-![ZeroDay Banner](https://via.placeholder.com/1200x400.png?text=ZeroDay+Classes+Platform)
+![ZeroDay Classes Banner](public/logo.png)
 
-**ZeroDay Classes** is a next-generation ed-tech platform designed for government exam aspirants in Odisha. Built with a "Cyber-Aesthetic" design language, it combines premium visuals with powerful tools for learning and assessment.
+A comprehensive, free exam preparation platform for Odisha government exams (OSSC CGL, OSSSC RI/ARI/Amin, OPSC) and coding tutorials. Built with **Next.js 15**, **Supabase**, and **TailwindCSS**.
 
-## 🚀 Key Features
+## 🚀 Features
 
-### 1. 🖥️ Cyber-Aesthetic UI
--   **Dark Mode Native**: Deep charcoal theme with neon accents (Electric Green, Cyber Blue).
--   **Glassmorphism**: Modern, translucent UI components.
--   **Animations**: Framer Motion powered transitions, 3D tilt effects, and typing animations.
-
-### 2. 📝 OSSC CGL Mock Test System (`/mock-test/ossc-cgl`)
--   **Full-Length Simulation**: 150 Questions covering Math, Reasoning, DI, Computer, Odisha GK, and Current Affairs.
--   **Real Exam Environment**:
-    -   120-minute countdown timer.
-    -   Negative marking (-0.25).
-    -   Question Palette & "Mark for Review".
--   **Analytics**:
-    -   Detailed Section-wise analysis.
-    -   **PDF Report Generation**: Downloadable exam certificates/cards.
-    -   **Local Leaderboard**: Compare scores with recent attempts.
-
-### 3. 💼 Odisha Career Center (`/odisha-jobs`)
--   **Job Alerts Feed**: Latest updates for OSSC, OPSC, Railway, and Banking jobs.
--   **Smart Job Cards**:
-    -   **Urgency Indicators**: Visual cues for "Closing Soon" jobs.
-    -   **"New" Badges**: Animated indicators for fresh posts.
--   **Productivity Tools**:
-    -   **Add to Calendar**: One-click .ics generation for application deadlines.
-    -   **WhatsApp Share**: Instantly share opportunities with friends.
--   **Filters**: Smart filtering by Organization and Qualification.
-
-### 4. 📊 Student Dashboard (`/dashboard`)
--   **Progress Tracking**: XP System, Modules completed, and "Machines Pwned".
--   **Certificates**: Repository of earned credentials.
+- **Mock Tests**: Full-length OSSC CGL simulations with 150 questions (Math, Reasoning, DI, Computer, GK, CA).
+- **Job Alerts**: Real-time tracking of Odisha government job vacancies.
+- **Coding Tutorials**: Integrated YouTube learning resources.
+- **Admin Dashboard**: Manage questions, tests, and job postings.
+- **Responsive Design**: Mobile-first UI with dark mode support.
 
 ## 🛠️ Tech Stack
 
--   **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
--   **Language**: [TypeScript](https://www.typescriptlang.org/)
--   **Styling**: [Tailwind CSS](https://tailwindcss.com/) + `clsx` + `tailwind-merge`
--   **UI Components**: [Shadcn UI](https://ui.shadcn.com/) (Radix Primitives)
--   **Animations**: [Framer Motion](https://www.framer.com/motion/)
--   **Icons**: [Lucide React](https://lucide.dev/)
--   **PDF Generation**: `jspdf` + `jspdf-autotable`
--   **Utilities**: `date-fns`, `canvas-confetti`
+- **Frontend**: Next.js 15 (App Router), React 19, Lucide React, Framer Motion
+- **Styling**: TailwindCSS v4, Shadcn/ui
+- **Backend**: Supabase (PostgreSQL, Auth, Realtime)
+- **Deployment**: Vercel
 
-## 🏃‍♂️ Getting Started
+## ⚙️ Setup & Installation
 
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/webspoit/zeroday-classes.git
+    git clone https://github.com/webspoilt/zeroday-classes.git
     cd zeroday-classes
     ```
 
@@ -60,37 +32,47 @@
     npm install
     ```
 
-3.  **Run the development server**
+3.  **Environment Variables**
+    Create a `.env.local` file:
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+    ```
+
+4.  **Run Development Server**
     ```bash
     npm run dev
     ```
 
-4.  **Open in Browser**
-    Visit [http://localhost:3000](http://localhost:3000)
+## 🌱 Database Seeding
+
+To populate the database with initial data (Mock Tests & Job Posts), run:
+
+```bash
+npm run seed
+```
+
+This script is safe to run multiple times (it skips existing data).
 
 ## 📂 Project Structure
 
 ```
-├── src/
-│   ├── app/                 # Next.js App Router Pages
-│   │   ├── dashboard/       # Student Dashboard
-│   │   ├── mock-test/       # Exam Systems (OSSC CGL)
-│   │   ├── odisha-jobs/     # Career Center
-│   │   └── page.tsx         # Landing Page
-│   ├── components/          # Reusable UI Components
-│   │   ├── Jobs/            # Job Card & related components
-│   │   ├── OSSCQuiz/        # Quiz Interface & Logic
-│   │   └── ui/              # Shadcn Primitives
-│   ├── data/                # Mock Data (Questions, Jobs)
-│   └── lib/                 # Utilities
-├── public/                  # Static Assets
-└── prisma/                  # Database Schema
+src/
+├── app/                 # Next.js App Router pages
+├── components/          # React components
+│   ├── layout/          # NavBar, Footer
+│   ├── ui/              # Reusable UI elements
+│   └── ...
+├── data/                # Static data (questions, jobs)
+├── lib/                 # Utilities & Supabase client
+└── scripts/             # CLI tools (seeding, maintenance)
 ```
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please fork the repository and submit a pull request.
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+MIT License © 2024 ZeroDay Classes

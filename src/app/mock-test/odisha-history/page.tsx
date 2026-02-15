@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { NavBar } from "@/components/NavBar";
-import { Footer } from "@/components/Footer";
+import { NavBar } from "@/components/layout/NavBar";
+import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/lib/supabaseClient";
 import questions from "@/data/odisha-history.json";
 import { motion, AnimatePresence } from "framer-motion";
@@ -123,8 +123,8 @@ export default function QuizPage() {
                                             whileTap={{ scale: 0.98 }}
                                             onClick={() => handleOptionSelect(option)}
                                             className={`w-full p-4 rounded-xl text-left transition-all border ${selectedOption === option
-                                                    ? "bg-primary/20 border-primary text-primary font-bold shadow-[0_0_15px_rgba(0,255,157,0.3)]"
-                                                    : "bg-white/5 border-white/10 hover:bg-white/10 text-foreground"
+                                                ? "bg-primary/20 border-primary text-primary font-bold shadow-[0_0_15px_rgba(0,255,157,0.3)]"
+                                                : "bg-white/5 border-white/10 hover:bg-white/10 text-foreground"
                                                 }`}
                                         >
                                             <div className="flex items-center">
@@ -144,8 +144,8 @@ export default function QuizPage() {
                                     onClick={handleNextQuestion}
                                     disabled={!selectedOption}
                                     className={`px-8 py-3 rounded-full font-bold flex items-center transition-all ${selectedOption
-                                            ? "bg-primary text-black hover:bg-primary/90 shadow-[0_0_20px_rgba(0,255,157,0.3)]"
-                                            : "bg-white/5 text-white/30 cursor-not-allowed"
+                                        ? "bg-primary text-black hover:bg-primary/90 shadow-[0_0_20px_rgba(0,255,157,0.3)]"
+                                        : "bg-white/5 text-white/30 cursor-not-allowed"
                                         }`}
                                 >
                                     {currentQuestionIndex === questions.length - 1 ? "Finish" : "Next Question"}

@@ -1,5 +1,5 @@
-import { NavBar } from "@/components/NavBar";
-import { Footer } from "@/components/Footer";
+import { NavBar } from "@/components/layout/NavBar";
+import { Footer } from "@/components/layout/Footer";
 import { ArrowRight, BookOpen, Briefcase, Code, FileText, GraduationCap, PlayCircle, Target, TrendingUp, Users, Youtube, Zap } from "lucide-react";
 import Link from "next/link";
 

@@ -3,12 +3,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getMockTestById, MockTest, Question } from '@/lib/mock-test-store';
-import { NavBar } from '@/components/NavBar';
+import { NavBar } from '@/components/layout/NavBar';
 import { Timer, ChevronRight, ChevronLeft, Flag, Send, CheckCircle, XCircle, MinusCircle, ArrowLeft, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { Download, Share2 } from 'lucide-react';
 
 // ─── Types ─────────────────────────────────────────
 interface FormattedQuestion extends Question {
@@ -251,6 +254,89 @@ function ResultsView({ test, result, onRetry }: { test: MockTest; result: TestRe
     const percentage = (result.correct / result.totalQuestions) * 100;
     const formatTime = (s: number) => `${Math.floor(s / 60)}m ${s % 60}s`;
 
+    const handleDownloadReport = () => {
+        const doc = new jsPDF();
+
+        // Header
+        doc.setFontSize(20);
+        doc.setTextColor(41, 128, 185);
+        doc.text('Mock Test Report', 14, 22);
+
+        doc.setFontSize(12);
+        doc.setTextColor(100);
+        doc.text(`Test: ${test.title}`, 14, 32);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 38);
+
+        // Summary Table
+        autoTable(doc, {
+            startY: 45,
+            head: [['Metric', 'Value']],
+            body: [
+                ['Score', `${result.score.toFixed(1)}`],
+                ['Correct Answers', `${result.correct}`],
+                ['Wrong Answers', `${result.wrong}`],
+                ['Unattempted', `${result.unattempted}`],
+                ['Accuracy', `${percentage.toFixed(0)}%`],
+                ['Time Taken', formatTime(result.timeTaken)],
+            ],
+            theme: 'striped',
+            headStyles: { fillColor: [41, 128, 185] },
+            styles: { fontSize: 10 },
+        });
+
+        // Detailed Analysis
+        const finalY = (doc as any).lastAutoTable.finalY + 15;
+        doc.setFontSize(14);
+        doc.setTextColor(41, 128, 185);
+        doc.text('Detailed Question Analysis', 14, finalY);
+
+        const tableData = result.questions.map((q, i) => {
+            const userAnsIndex = result.answers[q.globalIndex];
+            const userAns = userAnsIndex !== undefined ? q.options[userAnsIndex] : 'Skipped';
+            const correctAns = q.options[q.correct];
+            let status = 'Skipped';
+            if (userAnsIndex === q.correct) status = 'Correct';
+            else if (userAnsIndex !== undefined) status = 'Wrong';
+
+            return [
+                `${i + 1}`,
+                q.question,
+                userAns,
+                correctAns,
+                status
+            ];
+        });
+
+        autoTable(doc, {
+            startY: finalY + 5,
+            head: [['#', 'Question', 'Your Answer', 'Correct Answer', 'Status']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillColor: [41, 128, 185] },
+            styles: { fontSize: 9, cellWidth: 'wrap' },
+            columnStyles: {
+                0: { cellWidth: 10 },
+                1: { cellWidth: 60 },
+                2: { cellWidth: 40 },
+                3: { cellWidth: 40 },
+                4: { cellWidth: 20 },
+            },
+            didParseCell: function (data) {
+                if (data.section === 'body' && data.column.index === 4) {
+                    if (data.cell.raw === 'Correct') {
+                        data.cell.styles.textColor = [0, 180, 0];
+                    } else if (data.cell.raw === 'Wrong') {
+                        data.cell.styles.textColor = [200, 0, 0];
+                    } else {
+                        data.cell.styles.textColor = [150, 150, 150];
+                    }
+                }
+            }
+        });
+
+        doc.save(`${test.title.replace(/\s+/g, '_')}_Report.pdf`);
+    };
+
     return (
         <div className="min-h-screen bg-[#0f172a] pt-24 pb-20">
             <NavBar />
@@ -325,6 +411,9 @@ function ResultsView({ test, result, onRetry }: { test: MockTest; result: TestRe
                 </div>
 
                 <div className="flex gap-4 justify-center">
+                    <button onClick={handleDownloadReport} className="px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-500 transition-all flex items-center gap-2">
+                        <Download className="w-5 h-5" /> Download Report
+                    </button>
                     <button onClick={onRetry} className="px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all">
                         🔄 Retry Test
                     </button>

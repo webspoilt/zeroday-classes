@@ -1,3 +1,6 @@
 scrapling
 requests
 lxml
+curl_cffi
+playwright
+browserforge

@@ -1,22 +1,22 @@
 import json
 import os
-import requests
-from scrapling import Fetcher
+from scrapling.fetchers import StealthyFetcher
 from datetime import datetime
 
 def scrape_jobs():
-    print("🚀 Starting Scrapling Scraper...")
+    print("Starting Scrapling (Stealth) Scraper...")
     
-    # URL for Odisha Govt Jobs
-    url = "https://www.freejobalert.com/odisha-govt-jobs/"
+    # URL for Odisha Govt Jobs (Corrected URL)
+    url = "https://www.freejobalert.com/odisha-government-jobs/"
     
-    # Initialize Scrapling Fetcher
-    # Scrapling is powerful and handles headers automatically
-    fetcher = Fetcher(url)
+    # Initialize Scrapling StealthFetcher (Uses Camoufox/Firefox for bypassing)
+    page = StealthyFetcher.fetch(url, headless=True)
     
+    print(f"Fetch Status: {page.status}")
+
     # Target table containing the job listings
     # Structure: 3 rows per job starting from the 4th row
-    rows = fetcher.css('div.entry-content table tr')
+    rows = page.css('div.entry-content table tr')
     
     jobs = []
     
@@ -74,10 +74,10 @@ def scrape_jobs():
             })
             
         except Exception as e:
-            print(f"⚠️ Error parsing row {i}: {e}")
+            print(f"Error parsing row {i}: {e}")
             continue
 
-    print(f"✅ Scraped {len(jobs)} jobs.")
+    print(f"Successfully scraped {len(jobs)} jobs.")
 
     # Overwrite the jobs.json file (User request: delete existing jobs)
     output_path = os.path.join(os.path.dirname(__file__), '../../public/data/jobs.json')
@@ -86,7 +86,7 @@ def scrape_jobs():
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(jobs, f, indent=4)
     
-    print(f"📂 Master JSON updated at {output_path}")
+    print(f"Master JSON updated at {output_path}")
 
 if __name__ == "__main__":
     scrape_jobs()

@@ -40,7 +40,7 @@ async function check() {
         .select('question')
         .eq('test_id', testId);
 
-    if (questions) {
+    if (questions && count !== null) {
         const unique = new Set(questions.map(q => q.question)).size;
         console.log(`Unique Questions: ${unique}`);
         if (count > unique) {

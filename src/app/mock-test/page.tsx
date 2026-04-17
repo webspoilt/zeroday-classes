@@ -164,11 +164,12 @@ export default function MockTestHubPage() {
                                 <Link href="/mocks/OSSC_CGL_Mock_3_2026.html" target="_blank" className="block group">
                                     <div className="glass-card rounded-2xl p-6 border border-white/10 hover:border-orange-500/30 hover:bg-white/5 transition-all hover:shadow-lg hover:shadow-orange-500/5 relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-orange-500/10 transition-all" />
-                                        <h3 className="text-lg font-bold text-white group-hover:text-orange-400 transition-colors mb-2 font-heading">OSSC CGL Mock Test 3</h3>
-                                        <p className="text-sm text-slate-400 mb-4">150 Questions · 150 Minutes · Real-time Results</p>
-                                        <div className="flex items-center gap-2 text-orange-400 text-sm font-bold group-hover:gap-3 transition-all">
-                                            Launch Mock Engine <ChevronRight className="w-4 h-4" />
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h3 className="text-lg font-bold text-white group-hover:text-orange-400 transition-colors font-heading">OSSC CGL Mock Test 3</h3>
+                                            <span className="text-xs font-bold px-2 py-1 rounded-full bg-red-500/10 text-red-400 uppercase tracking-wider">🔒 Locked</span>
                                         </div>
+                                        <p className="text-sm text-slate-400 mb-2">150 Questions · 150 Minutes · PDF Report</p>
+                                        <p className="text-xs text-yellow-400 font-semibold">🕙 Unlocks: April 18, 2026 — 10:00 AM IST</p>
                                     </div>
                                 </Link>
                             </div>

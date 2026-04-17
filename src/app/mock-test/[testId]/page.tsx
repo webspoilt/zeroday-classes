@@ -10,8 +10,9 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { Download, Share2 } from 'lucide-react';
+import { Download, Share2, Mail, Loader2, Lock, ArrowRight } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
 
 // ─── Types ─────────────────────────────────────────
 interface FormattedQuestion extends Question {
@@ -30,8 +31,79 @@ interface TestResult {
 }
 
 // ─── Registration ──────────────────────────────────
-function Registration({ test, onStart }: { test: MockTest; onStart: (name: string) => void }) {
+function Registration({ test, onStart }: { test: MockTest; onStart: (name: string, email: string) => void }) {
     const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [otp, setOtp] = useState('');
+    const [step, setStep] = useState<'details' | 'otp'>('details');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [timeLeft, setTimeLeft] = useState(0);
+
+    useEffect(() => {
+        if (timeLeft > 0) {
+            const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [timeLeft]);
+
+    const handleSendOtp = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        if (!name || !phone || phone.length < 10) {
+            setError('Please enter valid details');
+            return;
+        }
+
+        // Rate Limit Check
+        const lastOtpTime = localStorage.getItem('last_otp_time');
+        const otpCount = parseInt(localStorage.getItem('otp_count_session') || '0');
+        const now = Date.now();
+
+        if (otpCount >= 3 && lastOtpTime && now - parseInt(lastOtpTime) < 1000 * 60 * 10) {
+            setError('Too many OTP attempts. Please wait 10 minutes.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { error } = await supabase.auth.signInWithOtp({
+                phone: '+91' + phone.replace(/\D/g, '').slice(-10),
+            });
+            if (error) throw error;
+
+            // Update Rate Limit
+            localStorage.setItem('last_otp_time', now.toString());
+            localStorage.setItem('otp_count_session', (otpCount + 1).toString());
+
+            setStep('otp');
+            setTimeLeft(60);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        try {
+            const { error } = await supabase.auth.verifyOtp({
+                phone: '+91' + phone.replace(/\D/g, '').slice(-10),
+                token: otp,
+                type: 'sms',
+            });
+            if (error) throw error;
+            onStart(name, email);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4">
@@ -64,23 +136,80 @@ function Registration({ test, onStart }: { test: MockTest; onStart: (name: strin
                     </div>
                 </div>
 
-                <form onSubmit={(e) => { e.preventDefault(); if (name.trim()) onStart(name.trim()); }} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">Your Name</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Enter your name"
-                            className="w-full px-4 py-3 bg-slate-950/50 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                            required
-                            autoFocus
-                        />
+                {error && (
+                    <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm text-center">
+                        {error}
                     </div>
-                    <button type="submit" className="w-full py-3.5 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg">
-                        🎯 Start Test
-                    </button>
-                </form>
+                )}
+
+                {step === 'details' ? (
+                    <form onSubmit={handleSendOtp} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-400 mb-2">Your Name *</label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Enter your name"
+                                className="w-full px-4 py-3 bg-slate-950/50 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-400 mb-2">Mobile Number *</label>
+                            <div className="relative">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-bold">+91</div>
+                                <input
+                                    type="tel"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    placeholder="Enter 10-digit number"
+                                    className="w-full pl-10 px-4 py-3 bg-slate-950/50 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                                    required
+                                    maxLength={10}
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-400 mb-2">Email (Optional)</label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="For result report"
+                                className="w-full px-4 py-3 bg-slate-950/50 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                            />
+                            <p className="text-xs text-slate-500 mt-1">Provide email to get the test report sent to you.</p>
+                        </div>
+                        <button type="submit" disabled={loading} className="w-full py-3.5 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2">
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Get OTP & Start'}
+                        </button>
+                    </form>
+                ) : (
+                    <form onSubmit={handleVerifyOtp} className="space-y-4">
+                        <div className="text-center mb-4">
+                            <div className="text-slate-400 text-sm">OTP sent to +91 {phone}</div>
+                            <button type="button" onClick={() => setStep('details')} className="text-xs text-blue-400 hover:text-blue-300">Change</button>
+                        </div>
+
+                        <div className="flex justify-center gap-2 mb-4">
+                            <input
+                                type="text"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                                placeholder="XXXXXX"
+                                className="w-32 text-center py-3 bg-slate-950/50 border border-slate-700 rounded-xl text-white text-xl tracking-widest focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all"
+                                maxLength={6}
+                                autoFocus
+                            />
+                        </div>
+
+                        <button type="submit" disabled={loading || otp.length < 6} className="w-full py-3.5 bg-green-600 text-white font-bold rounded-xl hover:bg-green-500 transition-all shadow-lg flex items-center justify-center gap-2">
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify & Start Test'}
+                        </button>
+                        {timeLeft > 0 && <div className="text-center text-xs text-slate-500">Resend in {timeLeft}s</div>}
+                    </form>
+                )}
             </motion.div>
         </div>
     );
@@ -246,13 +375,49 @@ function QuizInterface({ test, userName, onComplete }: { test: MockTest; userNam
 }
 
 // ─── Results View ──────────────────────────────────
-function ResultsView({ test, result, onRetry }: { test: MockTest; result: TestResult; onRetry: () => void }) {
+function ResultsView({ test, result, userEmail, userName, onRetry }: { test: MockTest; result: TestResult; userEmail: string; userName: string; onRetry: () => void }) {
+    const [sendingEmail, setSendingEmail] = useState(false);
+
     useEffect(() => {
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     }, []);
 
     const percentage = (result.correct / result.totalQuestions) * 100;
     const formatTime = (s: number) => `${Math.floor(s / 60)}m ${s % 60}s`;
+
+    const handleSendEmail = async () => {
+        if (!userEmail) {
+            alert('No email provided during registration.');
+            return;
+        }
+        setSendingEmail(true);
+        try {
+            const res = await fetch('/api/send-report', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: userEmail,
+                    name: userName,
+                    testTitle: test.title,
+                    score: result.score.toFixed(1),
+                    totalQuestions: result.totalQuestions,
+                    correct: result.correct,
+                    wrong: result.wrong,
+                    unattempted: result.unattempted,
+                    timeTaken: formatTime(result.timeTaken),
+                    questions: result.questions,
+                    answers: result.answers
+                })
+            });
+            const data = await res.json();
+            if (data.success) alert(`Report sent to ${userEmail}!`);
+            else alert('Failed to send email.');
+        } catch (e) {
+            console.error(e);
+            alert('Error sending email.');
+        } finally {
+            setSendingEmail(false);
+        }
+    };
 
     const handleDownloadReport = () => {
         const doc = new jsPDF();
@@ -399,8 +564,12 @@ function ResultsView({ test, result, onRetry }: { test: MockTest; result: TestRe
                                                 <div className="text-xs text-red-400 mb-1">Your answer: {q.options[userAns]}</div>
                                             )}
                                             <div className="text-xs text-green-400 mb-2">Correct: {q.options[q.correct]}</div>
+                                            <div className="text-xs text-green-400 mb-2">Correct: {q.options[q.correct]}</div>
                                             {q.explanation && (
-                                                <div className="text-xs text-slate-500 bg-white/5 rounded-lg p-2 mt-1">💡 {q.explanation}</div>
+                                                <div className="text-xs text-slate-500 bg-white/5 rounded-lg p-3 mt-1 whitespace-pre-wrap font-mono">
+                                                    💡 <strong>Explanation:</strong><br />
+                                                    {q.explanation}
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -412,8 +581,13 @@ function ResultsView({ test, result, onRetry }: { test: MockTest; result: TestRe
 
                 <div className="flex gap-4 justify-center">
                     <button onClick={handleDownloadReport} className="px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-500 transition-all flex items-center gap-2">
-                        <Download className="w-5 h-5" /> Download Report
+                        <Download className="w-5 h-5" /> Download PDF
                     </button>
+                    {userEmail && (
+                        <button onClick={handleSendEmail} disabled={sendingEmail} className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-all flex items-center gap-2 disabled:opacity-50">
+                            {sendingEmail ? <Loader2 className="w-5 h-5 animate-spin" /> : <Mail className="w-5 h-5" />} Email Report
+                        </button>
+                    )}
                     <button onClick={onRetry} className="px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all">
                         🔄 Retry Test
                     </button>
@@ -436,7 +610,21 @@ export default function DynamicTestPage() {
     const [loading, setLoading] = useState(true);
     const [phase, setPhase] = useState<'register' | 'quiz' | 'result'>('register');
     const [userName, setUserName] = useState('');
+    const [userEmail, setUserEmail] = useState('');
     const [result, setResult] = useState<TestResult | null>(null);
+
+    // Removed separate auth check since it is now in Registration
+    // Initial session check for existing sessions (optional, but good for UX)
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                // We could auto-fill user details here if we had a profile table
+                // For now just acknowledgement
+                console.log("Session found:", session.user.email);
+            }
+            setLoading(false);
+        });
+    }, []);
 
     useEffect(() => {
         // Skip for the hardcoded ossc-cgl route
@@ -475,7 +663,7 @@ export default function DynamicTestPage() {
     }
 
     if (phase === 'result' && result) {
-        return <ResultsView test={test} result={result} onRetry={() => { setResult(null); setPhase('register'); }} />;
+        return <ResultsView test={test} result={result} userEmail={userEmail} userName={userName} onRetry={() => { setResult(null); setPhase('register'); }} />;
     }
 
     if (phase === 'quiz') {
@@ -491,7 +679,9 @@ export default function DynamicTestPage() {
     return (
         <div className="min-h-screen bg-[#0f172a]">
             <NavBar />
-            <Registration test={test} onStart={(name) => { setUserName(name); setPhase('quiz'); }} />
+            {/* If user is already logged in, we can skip OTP? For now, we always show registration to get latest Name/Email intent, but we could auto-fill phone */}
+            <Registration test={test} onStart={(name, email) => { setUserName(name); setUserEmail(email); setPhase('quiz'); }} />
         </div>
     );
 }
+```

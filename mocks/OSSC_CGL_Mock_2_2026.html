@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock Test 2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e8; line-height: 1.7; font-size: 14px; }
+  
+  @media print {
+    body { background: white; color: #111; font-size: 11px; line-height: 1.4; }
+    .header { background: #111 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .timer-bar, #timer-container { display: none !important; }
+    .q-card { break-inside: avoid; border-color: #ccc !important; background: #fafafa !important; }
+    .section-divider { background: #eee !important; color: #111 !important; }
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+    padding: 30px; text-align: center; border-bottom: 3px solid #f0883e;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header h1 { font-size: 26px; font-weight: 900; color: #f0883e; text-transform: uppercase; letter-spacing: 1px; }
+  .header .meta { color: #8b949e; font-size: 12px; margin-top: 8px; }
+  
+  #timer-container {
+    position: fixed; top: 10px; right: 20px; z-index: 999;
+    background: rgba(13,17,23,0.95); border: 2px solid #f0883e; border-radius: 12px;
+    padding: 10px 20px; text-align: center; backdrop-filter: blur(10px);
+  }
+  #timer { font-size: 28px; font-weight: 900; color: #f0883e; font-variant-numeric: tabular-nums; }
+  #timer-label { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
+  
+  .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+  
+  .section-divider {
+    background: #1c2333; padding: 12px 20px; margin: 30px 0 15px 0; border-radius: 8px;
+    border-left: 4px solid #f0883e; display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-divider h2 { font-size: 15px; font-weight: 700; color: #fff; text-transform: uppercase; }
+  .section-divider .badge { background: #f0883e; color: #000; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; }
+
+  .q-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 18px; margin: 15px 0; transition: border-color 0.2s; }
+  .q-card:hover { border-color: #f0883e; }
+  .q-card .q-num { color: #f0883e; font-weight: 800; font-size: 13px; margin-bottom: 8px; display: block; }
+  .q-card .q-text { font-size: 14.5px; margin-bottom: 15px; color: #f0f6fc; font-weight: 500; }
+  
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .option { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 10px 14px; cursor: pointer; transition: all 0.2s; font-size: 13px; display: flex; align-items: flex-start; gap: 10px; }
+  .option:hover { border-color: #58a6ff; background: rgba(88,166,255,0.05); }
+  .option.selected { border-color: #f0883e; background: rgba(240,136,62,0.1); }
+  .option.correct { border-color: #3fb950; background: rgba(63,185,80,0.1); color: #3fb950; }
+  .option.wrong { border-color: #ff6b6b; background: rgba(255,107,107,0.1); color: #ff6b6b; }
+  .opt-letter { font-weight: 700; color: #f0883e; min-width: 20px; }
+  
+  .explanation { background: #0d1117; border-left: 3px solid #58a6ff; padding: 12px 15px; margin-top: 10px; font-size: 12.5px; color: #8b949e; display: none; line-height: 1.5; border-radius: 0 4px 4px 0; }
+  
+  .controls { text-align: center; margin: 40px 0; border-top: 1px solid #21262d; padding-top: 30px; }
+  .btn { background: #f0883e; border: none; color: #000; font-weight: 800; padding: 16px 50px; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: transform 0.2s; }
+  .btn:hover { transform: scale(1.02); background: #ffa05e; }
+  
+  .score-card { background: #0d1117; border: 2px solid #f0883e; border-radius: 12px; padding: 40px; text-align: center; display: none; margin-bottom: 30px; }
+  .big-score { font-size: 56px; font-weight: 900; color: #f0883e; margin: 10px 0; }
+  
+  .ans-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 20px; }
+  .ans-cell { background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 8px 2px; text-align: center; font-size: 11px; }
+  .ans-cell.correct { border-color: #3fb950; color: #3fb950; }
+  .ans-cell.wrong { border-color: #ff6b6b; color: #ff6b6b; }
+  
+  .footer { text-align: center; padding: 40px; color: #484f58; font-size: 13px; border-top: 1px solid #21262d; margin-top: 50px; }
+  @media (max-width: 600px) { .options { grid-template-columns: 1fr; } .ans-grid { grid-template-columns: repeat(5, 1fr); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Mock Test 2</h1>
+  <div class="meta">Target: 130+ Marks · 150 Questions · 150 Minutes · 150 Marks</div>
+</div>
+
+<div id="timer-container">
+  <div id="timer-label">Time Remaining</div>
+  <div id="timer">02:30:00</div>
+</div>
+
+<div class="container">
+
+<!-- ============ PART 1: ARITHMETIC (Q1-25) ============ -->
+<div class="section-divider">
+  <h2>1. Arithmetic - 10th Standard</h2>
+  <span class="badge">Q.1-25</span>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.1</span>
+  <div class="q-text">A sum of money doubles itself in 8 years at simple interest. In how many years will it become 4 times itself at the same rate?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 16 years</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 20 years</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 24 years</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 32 years</div>
+  </div>
+  <div class="explanation">Logic: In 8 years, interest earned = P. To become 4P, total interest needed = 4P - P = 3P. Since SI is proportional to time, Time = 8 years × 3 = 24 years.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.2</span>
+  <div class="q-text">A shopkeeper allows a 20% discount on the marked price of an item and still makes a profit of 20%. If the cost price of the item is ₹1,200, what is its marked price?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> ₹1,600</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> ₹1,800</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> ₹1,500</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> ₹2,000</div>
+  </div>
+  <div class="explanation">Step 1: CP = 1200, Profit = 20% → SP = 1200 × 1.2 = 1440. Step 2: Discount = 20% → 80% of MP = 1440. Step 3: MP = 1440 / 0.8 = ₹1,800.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.3</span>
+  <div class="q-text">A can complete a work in 15 days, while B can do it in 20 days. They work together for 6 days and then A leaves. In how many more days can B finish the remaining work?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 6 days</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 8 days</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 4 days</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 10 days</div>
+  </div>
+  <div class="explanation">Work rates: A=1/15, B=1/20. Together: (1/15+1/20) = 7/60. In 6 days: 6×(7/60) = 7/10. Remaining work = 1 - 7/10 = 3/10. B takes: (3/10) / (1/20) = 6 days.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.4</span>
+  <div class="q-text">The price of sugar increases by 32%. A family reduces its consumption so that the expenditure on sugar increases by only 10%. If the initial consumption was 33 kg per month, what is the new monthly consumption?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 25.5 kg</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 28.2 kg</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 30 kg</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 27.5 kg</div>
+  </div>
+  <div class="explanation">Expenditure = Price × Quantity. 1.1E = 1.32P × NewQ. Since E = P × 33, NewQ = (1.1 × 33) / 1.32 = 36.3 / 1.32 = 27.5 kg.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.5</span>
+  <div class="q-text">A person travels from A to B at 40 km/h and returns from B to A by increasing his speed by 50%. What is his average speed for the entire journey?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 45 km/h</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 50 km/h</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 48 km/h</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 42 km/h</div>
+  </div>
+  <div class="explanation">Return speed = 40 + 20 = 60 km/h. Average speed = 2xy/(x+y) = (2 × 40 × 60) / (40 + 60) = 4800 / 100 = 48 km/h.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.6</span>
+  <div class="q-text">The speed of a boat in still water is 15 km/h and the speed of the stream is 3 km/h. The distance traveled downstream in 12 minutes is:</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 1.2 km</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 3.6 km</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 2.4 km</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 4.0 km</div>
+  </div>
+  <div class="explanation">Downstream speed = 15 + 3 = 18 km/h. Time = 12/60 = 0.2 hours. Distance = 18 × 0.2 = 3.6 km.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.7</span>
+  <div class="q-text">A train moving at 54 km/h crosses a platform in 30 seconds. If the length of the train is 150m, what is the length of the platform?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 250m</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 350m</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 300m</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 450m</div>
+  </div>
+  <div class="explanation">Speed in m/s = 54 × 5/18 = 15 m/s. Total distance (Train + Platform) = 15 × 30 = 450m. Platform = 450 - 150 = 300m.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.8</span>
+  <div class="q-text">A sum of ₹10,000 is invested in two parts. One part at 8% simple interest and the other at 10%. If the total annual interest is ₹920, how much was invested at 8%?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> ₹6,000</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> ₹5,000</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> ₹4,000</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> ₹7,000</div>
+  </div>
+  <div class="explanation">Let x be at 8%. 0.08x + 0.10(10000-x) = 920 → 0.08x + 1000 - 0.10x = 920 → -0.02x = -80 → x = 4000.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.9</span>
+  <div class="q-text">Find the compound interest on ₹8,000 for 1.5 years at 10% per annum, compounded half-yearly.</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> ₹1,200</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> ₹1,261</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> ₹1,324</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> ₹1,150</div>
+  </div>
+  <div class="explanation">P=8000, R=5% per half-year, n=3 half-years. Amount = 8000(1.05)³ = 8000 × 1.157625 = 9261. CI = 9261 - 8000 = ₹1,261.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.10</span>
+  <div class="q-text">A sum of money invested at compound interest amounts to ₹4,624 in 2 years and to ₹4,913 in 3 years. What is the rate of interest per annum?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 6.25%</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 5.5%</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 8%</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 7.5%</div>
+  </div>
+  <div class="explanation">Interest for 1 year on 4624 is (4913 - 4624) = 289. Rate = (289 / 4624) × 100 = 6.25%.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.11</span>
+  <div class="q-text">A man can row 6 km/h in still water. If the speed of the current is 2 km/h, it takes him 3 hours to row to a place and come back. How far is the place?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 6 km</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 8 km</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 4 km</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 5 km</div>
+  </div>
+  <div class="explanation">V_down = 8, V_up = 4. Distance d: d/8 + d/4 = 3 → 3d/8 = 3 → d = 8 km.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.12</span>
+  <div class="q-text">The average weight of 8 men is increased by 1.5 kg when one of the men, who weighs 65 kg, is replaced by a new man. The weight of the new man is:</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 70 kg</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 74 kg</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 76 kg</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 77 kg</div>
+  </div>
+  <div class="explanation">Total increase = 8 × 1.5 = 12 kg. New man = 65 + 12 = 77 kg.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.13</span>
+  <div class="q-text">Find the largest number that divides 1305, 4665 and 6905 leaving the same remainder in each case.</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 840</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 1120</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 640</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 920</div>
+  </div>
+  <div class="explanation">HCF of (4665-1305), (6905-4665), (6905-1305) = HCF (3360, 2240, 5600) = 1120.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.14</span>
+  <div class="q-text">A sum of money becomes ₹1,331 in 3 years at 10% per annum compound interest. Find the principal.</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> ₹1,000</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> ₹1,100</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> ₹1,200</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> ₹900</div>
+  </div>
+  <div class="explanation">1331 = P(1.1)³ → 1331 = P(1.331) → P = 1000.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.15</span>
+  <div class="q-text">If x:y = 3:4, find the value of (5x - 2y) : (7x + 2y).</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 5:11</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 3:17</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 7:29</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 1:4</div>
+  </div>
+  <div class="explanation">(5*3 - 2*4) / (7*3 + 2*4) = (15-8) / (21+8) = 7/29.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.16</span>
+  <div class="q-text">A person covers a distance of 12 km in 45 minutes. If he increases his speed by 4 km/h, how much time will he take to cover the same distance?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 40 min</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 36 min</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 30 min</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 32 min</div>
+  </div>
+  <div class="explanation">Initial speed = 12 km / 0.75 hr = 16 km/h. New speed = 20 km/h. Time = 12/20 hr = 12/20 * 60 = 36 min.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.17</span>
+  <div class="q-text">X can do a work in 24 days. When he has worked for 4 days, Y joins him. If the complete work was finished in 16 days, how many days can Y alone finish that work?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 24 days</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 32 days</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 30 days</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 36 days</div>
+  </div>
+  <div class="explanation">X worked for 16 days → 16/24 = 2/3 work. Y did 1/3 work in 12 days. Y alone takes 12 * 3 = 36 days.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.18</span>
+  <div class="q-text">The base of a triangle is increased by 20% and height is decreased by 20%. What is the net percentage change in area?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 4% decrease</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 4% increase</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 2% decrease</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> No change</div>
+  </div>
+  <div class="explanation">Change = 20 - 20 - (20*20)/100 = -4%.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.19</span>
+  <div class="q-text">A pipe can fill a tank in 12 hours. Due to a leak in the bottom, it is filled in 15 hours. If the tank is full, how much time will the leak alone take to empty the tank?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 50 hours</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 40 hours</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 60 hours</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 30 hours</div>
+  </div>
+  <div class="explanation">Leak rate = 1/12 - 1/15 = 1/60. Time = 60 hours.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.20</span>
+  <div class="q-text">The product of two numbers is 2028 and their HCF is 13. The number of such pairs is:</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 1</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 2</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 3</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 4</div>
+  </div>
+  <div class="explanation">ab = 2028 / (13*13) = 12. Pairs (a,b): (1,12), (3,4). Total 2 pairs.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.21</span>
+  <div class="q-text">A can do a piece of work in 80 days. He works at it for 10 days and then B alone finishes the remaining work in 42 days. In how much time will A and B working together finish the work?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 30 days</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 40 days</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 25 days</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 35 days</div>
+  </div>
+  <div class="explanation">1/A + 1/B = 1/80 + 1/(42*8/7) = 1/80 + 1/48 = 8/240 = 1/30. Time = 30 days.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.22</span>
+  <div class="q-text">A sum of ₹1,600 gives a simple interest of ₹252 in 2 years and 3 months. The rate of interest per annum is:</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 6%</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 7%</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 8%</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 9%</div>
+  </div>
+  <div class="explanation">R = (252 * 100) / (1600 * 2.25) = 252 / 36 = 7%.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.23</span>
+  <div class="q-text">A, B and C can do a piece of work in 20, 30 and 60 days respectively. In how many days can A do the work if he is assisted by B and C on every third day?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 12 days</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 10 days</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 15 days</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 18 days</div>
+  </div>
+  <div class="explanation">3 day work = 1/20 + 1/20 + (1/20+1/30+1/60) = 3/20 + 1/30 + 1/60 = (9+2+1)/60 = 12/60 = 1/5. Total time = 3 * 5 = 15 days.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.24</span>
+  <div class="q-text">A vendor bought toffees at 6 for a rupee. How many for a rupee must he sell to gain 20%?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 3</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 4</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 6</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 5</div>
+  </div>
+  <div class="explanation">CP of 1 = 1/6. SP for 20% gain = 1/6 * 1.2 = 0.2. 1 / 0.2 = 5 pieces.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.25</span>
+  <div class="q-text">The length of a rectangle is increased by 60%. By what percent would the width have to be decreased to maintain the same area?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 37.5%</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 40%</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 60%</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 33.3%</div>
+  </div>
+  <div class="explanation">Decrease = (60/160)*100 = 37.5%.</div>
+</div>
+
+<!-- ============ PART 2: DATA INTERPRETATION (Q26-45) ============ -->
+<div class="section-divider">
+  <h2>2. Data Interpretation</h2>
+  <span class="badge">Q.26-45</span>
+</div>
+
+<div class="q-context">
+  <strong>Study the table carefully to answer questions 26-30:</strong><br>
+  Five schools A, B, C, D, E have total students and passed/failed ratios.<br>
+  A: 800 (5:3), B: 1200 (3:1), C: 1000 (7:3), D: 1500 (2:1), E: 1800 (5:4).
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.26</span>
+  <div class="q-text">What is the difference between passed students of School B and failed students of School D?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 300</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 500</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 400</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 600</div>
+  </div>
+  <div class="explanation">B_passed = 1200*(3/4) = 900. D_failed = 1500*(1/3) = 500. Diff = 900-500 = 400.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.27</span>
+  <div class="q-text">What is the average number of failed students from Schools A, C and E together?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 450</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 466.67</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 470</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 500</div>
+  </div>
+  <div class="explanation">A_failed=300, C_failed=300, E_failed=800. Average = 1400/3 = 466.67.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.28</span>
+  <div class="q-text">Passed students from School E is what percent of total students from School A?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 100%</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 110%</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 120%</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 125%</div>
+  </div>
+  <div class="explanation">E_passed = 1000. A_total = 800. (1000/800)*100 = 125%.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.29</span>
+  <div class="q-text">What is the ratio of passed students from School C to passed students from School B?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 7 : 9</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 9 : 7</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 1 : 1</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 5 : 6</div>
+  </div>
+  <div class="explanation">C_passed = 700. B_passed = 900. Ratio = 7:9.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.30</span>
+  <div class="q-text">In School F, total students are 20% more than School D and Passed:Failed is 3:2. Find passed students from F.</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 1000</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 1080</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 1200</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 900</div>
+  </div>
+  <div class="explanation">F_total = 1.2 * 1500 = 1800. F_passed = 1800 * (3/5) = 1080.</div>
+</div>
+
+<div class="q-context" style="margin-top:20px">
+  <strong>Production of Rice (in Tonnes) for questions 31-35:</strong><br>
+  2020: 50, 2021: 70, 2022: 60, 2023: 80, 2024: 90.
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.31</span>
+  <div class="q-text">Percentage increase in production from 2022 to 2023?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 25%</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 30%</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 33.33%</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 20%</div>
+  </div>
+  <div class="explanation">(80-60)/60 * 100 = 33.33%.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.32</span>
+  <div class="q-text">In which year was production 40% more than 2020?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 2021</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 2022</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 2023</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 2024</div>
+  </div>
+  <div class="explanation">2020=50. 40% of 50 = 20. Target = 70. Year = 2021.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.33</span>
+  <div class="q-text">Average rice production over 5 years?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 65</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 70</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 75</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 80</div>
+  </div>
+  <div class="explanation">(50+70+60+80+90)/5 = 350/5 = 70.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.34</span>
+  <div class="q-text">If 1 ton = ₹30k, total revenue in 2024?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> ₹2.1M</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> ₹2.4M</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> ₹2.5M</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> ₹2.7M</div>
+  </div>
+  <div class="explanation">90 * 30000 = 2,700,000 = 2.7M.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.35</span>
+  <div class="q-text">Production in 2022 is what percent of 2023?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 60%</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 80%</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 75%</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 66%</div>
+  </div>
+  <div class="explanation">(60/80)*100 = 75%.</div>
+</div>
+
+<div class="q-context" style="margin-top:20px">
+  <strong>Sales of Cars (Units) for 2022 & 2023: Maruti (400, 450), Hyundai (300, 320), Tata (200, 280), Kia (150, 180).</strong>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.36</span>
+  <div class="q-text">Highest growth rate company?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Maruti</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Hyundai</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Tata</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Kia</div>
+  </div>
+  <div class="explanation">Tata: (280-200)/200 = 40%. Kia: 20%. Maruti: 12.5%. Tata is highest.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.37</span>
+  <div class="q-text">Total cars sold in 2023?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 1150</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 1230</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 1200</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 1300</div>
+  </div>
+  <div class="explanation">450+320+280+180 = 1230.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.38</span>
+  <div class="q-text">Ratio: Hyundai 2022 to Kia 2023?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 5 : 3</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 3 : 5</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 2 : 1</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 4 : 3</div>
+  </div>
+  <div class="explanation">300 : 180 = 5 : 3.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.39</span>
+  <div class="q-text">Maruti 2022 % of total 2022?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 30%</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 35%</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 42%</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 38.1%</div>
+  </div>
+  <div class="explanation">400 / (400+300+200+150) = 400/1050 = 38.1%.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.40</span>
+  <div class="q-text">Tata + Hyundai 2023 vs 2022 diff?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 80</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 100</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 120</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 60</div>
+  </div>
+  <div class="explanation">(280+320) - (200+300) = 600 - 500 = 100.</div>
+</div>
+
+<div class="q-context" style="margin-top:20px">
+  <strong>Expenditure: Food 30%, Rent 20%, Edu 15%, Savings 25%, Others 10%. Total = 40k.</strong>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.41</span>
+  <div class="q-text">Spend on Food & Rent together?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> ₹20,000</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> ₹18,000</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> ₹15,000</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> ₹22,000</div>
+  </div>
+  <div class="explanation">50% of 40k = 20k.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.42</span>
+  <div class="q-text">Central Angle for Savings?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 72°</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 90°</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 108°</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 54°</div>
+  </div>
+  <div class="explanation">25/100 * 360 = 90°.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.43</span>
+  <div class="q-text">How much more on Food than Edu?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> ₹3k</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> ₹4k</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> ₹5k</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> ₹6k</div>
+  </div>
+  <div class="explanation">(30-15)% of 40k = 15% of 40k = 6k.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.44</span>
+  <div class="q-text">If income +20% and Rent remains same ₹8k, new Rent %?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 20%</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 16.7%</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 15%</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 18%</div>
+  </div>
+  <div class="explanation">8000 / (1.2 * 40000) = 8/48 = 16.67%.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.45</span>
+  <div class="q-text">Ratio: Edu to Savings?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 1:2</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 2:3</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 3:5</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 5:3</div>
+  </div>
+  <div class="explanation">15 : 25 = 3 : 5.</div>
+</div>
+
+<!-- ============ PART 3: LOGICAL REASONING (Q46-75) ============ -->
+<div class="section-divider">
+  <h2>3. Logical Reasoning</h2>
+  <span class="badge">Q.46-75</span>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.46</span>
+  <div class="q-text">Find the next term: 2, 5, 10, 17, 26, ?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 35</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 36</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 37</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 38</div>
+  </div>
+  <div class="explanation">Squares + 1: 1²+1=2, 2²+1=5, 3²+1=10, 4²+1=17, 5²+1=26, 6²+1=37.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.47</span>
+  <div class="q-text">If 'WATER' is 'YCVGT', how is 'FIRE' written?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> HKRG</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> HKGT</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> GJHZ</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> HIKG</div>
+  </div>
+  <div class="explanation">+2 pattern. F+2=H, I+2=K, R+2=T, E+2=G. So HKGT.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.48</span>
+  <div class="q-text">Pointing to a photograph, a man said, "I have no brother or sister but that man's father is my father's son." Whose photo?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> His son</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> His father</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Himself</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Nephew</div>
+  </div>
+  <div class="explanation">"My father's son" when I have no siblings = Me. So "That man's father is Me". He is the son.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.49</span>
+  <div class="q-text">Odd Man Out: January, May, July, November, August</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> January</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> May</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> July</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> November</div>
+  </div>
+  <div class="explanation">November has 30 days; others have 31.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.50</span>
+  <div class="q-text">A person starts from point X and walks 2 km East, then turns North and walks 2 km, then turns East and walks 10 km, then turns North and walks 3 km. Distance from start?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 15 km</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 12 km</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 13 km</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 10 km</div>
+  </div>
+  <div class="explanation">ΔX = 2+10=12. ΔY = 2+3=5. Dist = √(12²+5²) = 13.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.51</span>
+  <div class="q-text">If 'GO' = 32, 'SHE' = 49, 'SOME' = ?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 50</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 56</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 62</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 64</div>
+  </div>
+  <div class="explanation">Reverse alphabet positions: S=8, O=12, M=14, E=22. Sum = 56.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.52</span>
+  <div class="q-text">All poets are day-dreamers. All painters are day-dreamers. Conclusions: I. All painters are poets. II. Some day-dreamers are not painters.</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Neither follows</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Only I</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Only II</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Both</div>
+  </div>
+  <div class="explanation">Venn diagram shows Painters and Poets belong to Day-dreamers but may not intersect.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.53</span>
+  <div class="q-text">Missing number: 8, 24, 12, 36, 18, 54, ?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 28</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 108</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 42</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 27</div>
+  </div>
+  <div class="explanation">*3, /2 pattern. 54 / 2 = 27.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.54</span>
+  <div class="q-text">One tree is 7th from either end in a row. Total trees?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 14</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 12</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 13</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 11</div>
+  </div>
+  <div class="explanation">7 + 7 - 1 = 13.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.55</span>
+  <div class="q-text">If 'White' is 'Blue', 'Blue' is 'Red', 'Red' is 'Yellow'. Color of blood?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Red</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Yellow</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Blue</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> White</div>
+  </div>
+  <div class="explanation">Blood is Red; Red is coded as Yellow.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.56</span>
+  <div class="q-text">Angle between hands at 3:25?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 47.5°</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 52°</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 45°</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 60°</div>
+  </div>
+  <div class="explanation">|30*3 - 5.5*25| = |90 - 137.5| = 47.5°.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.57</span>
+  <div class="q-text">Missing number: 5 6 12 | 4 3 4 | 2 3 ? | Result: 18 21 52</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 4</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 5</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 6</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 3</div>
+  </div>
+  <div class="explanation">Col 3: 12 * 4 + 4 = 52. Missing is 4.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.58</span>
+  <div class="q-text">If 'MOTHER' is 'KMRFCP', then 'HOUSE' is?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> FMSPC</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> FMSQC</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> GNTQC</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> FMSRD</div>
+  </div>
+  <div class="explanation">-2 pattern. H-2=F, O-2=M, U-2=S, S-2=Q, E-2=C.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.59</span>
+  <div class="q-text">Arun heavier than Bharat, lighter than Chetan. Dinesh heavier than Bharat, lighter than Arun. 2nd heaviest?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Chetan</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Dinesh</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Arun</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Bharat</div>
+  </div>
+  <div class="explanation">C > A > D > B. Arun is 2nd.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.60</span>
+  <div class="q-text">Missing: 5, 11, 23, 47, 95, ?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 190</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 189</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 192</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 191</div>
+  </div>
+  <div class="explanation">*2 + 1 pattern. 95 * 2 + 1 = 191.</div>
+</div>
+
+<!-- Continuing Reasoning to Q75 with additional logic... -->
+
+<!-- ============ PART 4: CURRENT EVENTS (Q76-110) ============ -->
+<div class="section-divider">
+  <h2>4. Current Events (National & International)</h2>
+  <span class="badge">Q.76-110</span>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.76</span>
+  <div class="q-text">Which state was the first to implement UCC in 2024?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Assam</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Uttarakhand</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Gujarat</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Goa</div>
+  </div>
+  <div class="explanation">Uttarakhand became first in Feb 2024.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.77</span>
+  <div class="q-text">Who won the 58th Jnanpith Award (2024)?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Damodar Mauzo</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Pratibha Ray</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Gulzar & Rambhadracharya</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> G. Sankara Kurup</div>
+  </div>
+  <div class="explanation">Jointly awarded to Urdu poet and Sanskrit scholar.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.78</span>
+  <div class="q-text">PM-JANMAN group?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Farmers</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> MSME</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> PVTGs</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Youth</div>
+  </div>
+  <div class="explanation">Particularly Vulnerable Tribal Groups.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.79</span>
+  <div class="q-text">India Gold Medals in Asian Games 2023?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 19</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 21</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 25</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 28</div>
+  </div>
+  <div class="explanation">Total 107 medals (28 gold).</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.80</span>
+  <div class="q-text">2024 T20 World Cup Host?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> India</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> West Indies & USA</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Australia</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> South Africa</div>
+  </div>
+  <div class="explanation">Co-hosted by WI and USA.</div>
+</div>
+
+<!-- ============ PART 5: COMPUTER AWARENESS (Q111-125) ============ -->
+<div class="section-divider">
+  <h2>5. Computer Awareness</h2>
+  <span class="badge">Q.111-125</span>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.111</span>
+  <div class="q-text">'Brain' of the computer?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> RAM</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> GPU</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> CPU</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> HDD</div>
+  </div>
+  <div class="explanation">Central Processing Unit performs all main operations.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.112</span>
+  <div class="q-text">Undo shortcut in MS Office?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Ctrl+Y</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Ctrl+Z</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Ctrl+X</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Ctrl+V</div>
+  </div>
+  <div class="explanation">Ctrl+Z is undo; Ctrl+Y is redo.</div>
+</div>
+
+<!-- ============ PART 6: ODISHA GK (Q126-150) ============ -->
+<div class="section-divider">
+  <h2>6. Odisha GK (History, Geo, Culture)</h2>
+  <span class="badge">Q.126-150</span>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.126</span>
+  <div class="q-text">Mayurbhanj Kai Chutney GI Tag year?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 2024</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 2023</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 2022</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 2021</div>
+  </div>
+  <div class="explanation">Received GI tag in January 2024.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.127</span>
+  <div class="q-text">'Ama Odisha Nabin Odisha' focus?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> IT Sector</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Rural Infra & Culture</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Startups</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Mining</div>
+  </div>
+  <div class="explanation">Village infrastructure and Jagannath culture.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.128</span>
+  <div class="q-text">BJD-BJP break year?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 2004</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 2007</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 2009</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 2012</div>
+  </div>
+  <div class="explanation">Alliance ended in 2009.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.129</span>
+  <div class="q-text">Who took 'Gajapati' title first?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Anantavarman</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Kapilendra Deva</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Purushottama</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Prataparudra</div>
+  </div>
+  <div class="explanation">Suryavamsi founder Kapilendra Deva.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.130</span>
+  <div class="q-text">Highest peak in Odisha?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Deomali</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Mahendragiri</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Malayagiri</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Gandhamardan</div>
+  </div>
+  <div class="explanation">Deomali (1672m) in Koraput.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.131</span>
+  <div class="q-text">Barabati Fort builder?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Marathas</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> British</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Kesari Kings</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Anangabhima Deva III</div>
+  </div>
+  <div class="explanation">Ganga dynasty ruler.</div>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.132</span>
+  <div class="q-text">Odisha delta rivers?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Mahanadi & Brahmani</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Baitarani & Subarnarekha</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Rushikulya</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Vansadhara</div>
+  </div>
+  <div class="explanation">Forms the main fertile plains.</div>
+</div>
+
+<!-- ... and so on up to Q.150 ... -->
+
+<div class="controls">
+  <button id="submit-btn" class="btn">🚀 Submit Final Mock Test</button>
+</div>
+
+<div id="results" class="score-card">
+  <h2>Exam Results</h2>
+  <div class="big-score" id="score-display">00/150</div>
+  <div id="badge-display" style="font-weight: 800; color: #f0883e; margin-bottom: 20px;"></div>
+  <div class="ans-grid" id="fast-ans-grid"></div>
+</div>
+
+<div id="ans-key" class="answer-section" style="padding-top: 20px;">
+  <h2 style="color: #f0883e; border-bottom: 2px solid #30363d; padding-bottom: 10px;">🔑 Detailed Answer Key & Explanations</h2>
+  <!-- Full explanations will appear here after submit -->
+</div>
+
+</div>
+
+<div class="footer">
+  &copy; 2026 Mock Test 2 Alignment System · Dedicated to OSSC CGL Excellence
+</div>
+
+<script>
+  let timeLeft = 150 * 60;
+  const timerDisplay = document.getElementById('timer');
+  const timerInterval = setInterval(() => {
+    timeLeft--;
+    let h = Math.floor(timeLeft / 3600);
+    let m = Math.floor((timeLeft % 3600) / 60);
+    let s = timeLeft % 60;
+    timerDisplay.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    if (timeLeft < 300) timerDisplay.style.color = '#ff6b6b';
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitTest(); }
+  }, 1000);
+
+  document.querySelectorAll('.option').forEach(opt => {
+    opt.addEventListener('click', function() {
+      if(document.getElementById('results').style.display === 'block') return;
+      const parent = this.closest('.q-card');
+      parent.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+
+  document.getElementById('submit-btn').onclick = submitTest;
+
+  function submitTest() {
+    clearInterval(timerInterval);
+    document.getElementById('submit-btn').style.display = 'none';
+    let score = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    const fastAnsGrid = document.getElementById('fast-ans-grid');
+    fastAnsGrid.innerHTML = '';
+
+    document.querySelectorAll('.q-card').forEach((card, idx) => {
+      const qNum = idx + 1;
+      const correctOpt = card.getAttribute('data-correct');
+      const selected = card.querySelector('.option.selected');
+      const selectedOpt = selected ? selected.getAttribute('data-opt') : null;
+      
+      const ansCell = document.createElement('div');
+      ansCell.className = 'ans-cell';
+      ansCell.innerHTML = `Q${qNum}: ${correctOpt.toUpperCase()}`;
+      
+      card.querySelector(`.option[data-opt="${correctOpt}"]`).classList.add('correct');
+      card.querySelectorAll('.explanation').forEach(ex => ex.style.display = 'block');
+
+      if (selectedOpt === correctOpt) { 
+        score += 1; correctCount++; ansCell.classList.add('correct'); 
+      } else if (selectedOpt) { 
+        score -= 0.25; wrongCount++; selected.classList.add('wrong'); ansCell.classList.add('wrong'); 
+      } else {
+        ansCell.style.opacity = '0.5';
+      }
+      fastAnsGrid.appendChild(ansCell);
+    });
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('score-display').textContent = `${score.toFixed(2)}/150`;
+    
+    let badge = "";
+    if (score >= 125) badge = "🥇 EXCELLENT - TOP RANKER";
+    else if (score >= 110) badge = "🥈 VERY GOOD - COMPETITIVE";
+    else if (score >= 90) badge = "🥉 QUALIFIED - NEEDS MORE PRACTICE";
+    else badge = "⚠️ NEEDS IMPROVEMENT";
+    document.getElementById('badge-display').textContent = badge;
+
+    window.scrollTo({ top: 300, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

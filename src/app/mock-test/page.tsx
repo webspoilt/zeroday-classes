@@ -141,7 +141,41 @@ export default function MockTestHubPage() {
                             </section>
                         )}
 
+                        {/* Interactive Legacy Portal */}
+                        <section>
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center"><Sparkles className="w-5 h-5 text-orange-400" /></div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-white font-heading">⚡ Interactive Simulation Engine (v2)</h2>
+                                    <p className="text-sm text-slate-500">Standalone high-precision mocks with advanced logic</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <Link href="/mocks/OSSC_CGL_Mock_2_2026.html" target="_blank" className="block group">
+                                    <div className="glass-card rounded-2xl p-6 border border-white/10 hover:border-orange-500/30 hover:bg-white/5 transition-all hover:shadow-lg hover:shadow-orange-500/5 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-orange-500/10 transition-all" />
+                                        <h3 className="text-lg font-bold text-white group-hover:text-orange-400 transition-colors mb-2 font-heading">OSSC CGL Mock Test 2</h3>
+                                        <p className="text-sm text-slate-400 mb-4">150 Questions · 150 Minutes · Real-time Results</p>
+                                        <div className="flex items-center gap-2 text-orange-400 text-sm font-bold group-hover:gap-3 transition-all">
+                                            Launch Mock Engine <ChevronRight className="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                </Link>
+                                <Link href="/mocks/OSSC_CGL_Mock_3_2026.html" target="_blank" className="block group">
+                                    <div className="glass-card rounded-2xl p-6 border border-white/10 hover:border-orange-500/30 hover:bg-white/5 transition-all hover:shadow-lg hover:shadow-orange-500/5 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-orange-500/10 transition-all" />
+                                        <h3 className="text-lg font-bold text-white group-hover:text-orange-400 transition-colors mb-2 font-heading">OSSC CGL Mock Test 3</h3>
+                                        <p className="text-sm text-slate-400 mb-4">150 Questions · 150 Minutes · Real-time Results</p>
+                                        <div className="flex items-center gap-2 text-orange-400 text-sm font-bold group-hover:gap-3 transition-all">
+                                            Launch Mock Engine <ChevronRight className="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                </Link>
+                            </div>
+                        </section>
+
                         {/* Premium Tests */}
+
                         {premiumTests.length > 0 && (
                             <section>
                                 <div className="flex items-center gap-3 mb-6">

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock Test 3</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0a0a0b; color: #e0e0e8; line-height: 1.7; font-size: 14px; }
+  
+  @media print {
+    body { background: white; color: #111; font-size: 11px; line-height: 1.4; }
+    .header { background: #111 !important; color: #fff !important; }
+    .timer-bar, #timer-container { display: none !important; }
+    .q-card { break-inside: avoid; border-color: #ccc !important; background: #fafafa !important; }
+    .section-divider { background: #eee !important; color: #111 !important; }
+  }
+
+  .header {
+    background: linear-gradient(135deg, #111 0%, #000 100%);
+    padding: 30px; text-align: center; border-bottom: 3px solid #f0883e;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header h1 { font-size: 26px; font-weight: 900; color: #f0883e; text-transform: uppercase; letter-spacing: 2px; }
+  .header .meta { color: #8b949e; font-size: 12px; margin-top: 8px; font-weight: 600; }
+  
+  #timer-container {
+    position: fixed; top: 10px; right: 20px; z-index: 999;
+    background: rgba(13,17,23,0.9); border: 2px solid #f0883e; border-radius: 12px;
+    padding: 10px 20px; text-align: center; backdrop-filter: blur(8px);
+  }
+  #timer { font-size: 28px; font-weight: 900; color: #f0883e; font-variant-numeric: tabular-nums; }
+  #timer-label { font-size: 10px; color: #8b949e; text-transform: uppercase; }
+  
+  .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+  
+  .section-divider {
+    background: #141414; padding: 12px 20px; margin: 35px 0 15px 0; border-radius: 8px;
+    border-left: 4px solid #f0883e; display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-divider h2 { font-size: 15px; font-weight: 700; color: #fff; text-transform: uppercase; }
+  .section-divider .badge { background: #f0883e; color: #000; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; }
+
+  .q-card { background: #1a1a1c; border: 1px solid #30363d; border-radius: 10px; padding: 20px; margin: 15px 0; transition: 0.3s; }
+  .q-card:hover { border-color: #f0883e; transform: translateY(-2px); }
+  .q-card .q-num { color: #f0883e; font-weight: 800; font-size: 13px; margin-bottom: 10px; display: block; }
+  .q-card .q-text { font-size: 15px; margin-bottom: 20px; color: #fff; font-weight: 500; }
+  
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .option { background: #0a0a0b; border: 1px solid #333; border-radius: 8px; padding: 12px 16px; cursor: pointer; transition: 0.2s; font-size: 13.5px; display: flex; align-items: flex-start; gap: 10px; }
+  .option:hover { border-color: #f0883e; background: rgba(240,136,62,0.05); }
+  .option.selected { border-color: #f0883e; background: rgba(240,136,62,0.15); }
+  .option.correct { border-color: #3fb950; background: rgba(63,185,80,0.1); color: #3fb950; }
+  .option.wrong { border-color: #ff6b6b; background: rgba(255,107,107,0.1); color: #ff6b6b; }
+  .opt-letter { font-weight: 800; color: #f0883e; min-width: 25px; }
+  
+  .explanation { background: #000; border-left: 3px solid #58a6ff; padding: 15px; margin-top: 15px; font-size: 13px; color: #888; display: none; border-radius: 4px; }
+  
+  .controls { text-align: center; margin: 50px 0; }
+  .btn { background: #f0883e; border: none; color: #000; font-weight: 800; padding: 18px 60px; border-radius: 30px; cursor: pointer; text-transform: uppercase; transition: 0.3s; box-shadow: 0 4px 15px rgba(240,136,62,0.3); }
+  .btn:hover { background: #fff; box-shadow: 0 6px 20px rgba(255,255,255,0.2); transform: scale(1.05); }
+  
+  .score-card { background: #111; border: 2px solid #f0883e; border-radius: 20px; padding: 50px; text-align: center; display: none; margin-bottom: 40px; }
+  .big-score { font-size: 64px; font-weight: 900; color: #f0883e; margin: 15px 0; }
+  
+  .footer { text-align: center; padding: 50px; color: #444; font-size: 13px; border-top: 1px solid #222; margin-top: 60px; }
+  @media (max-width: 600px) { .options { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Mock Test 3</h1>
+  <div class="meta">150 Questions · 150 Minutes · 150 Marks · Negative Marking: -0.25</div>
+</div>
+
+<div id="timer-container">
+  <div id="timer-label">Time Remaining</div>
+  <div id="timer">02:30:00</div>
+</div>
+
+<div class="container">
+
+<!-- ============ PART 1: ARITHMETIC (Q1-25) ============ -->
+<div class="section-divider">
+  <h2>1. Arithmetic - 10th Standard</h2>
+  <span class="badge">Q.1-25</span>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.1</span>
+  <div class="q-text">Find the value of √1.5625.</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 1.15</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 1.25</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 0.125</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 12.5</div>
+  </div>
+  <div class="explanation">1.25 * 1.25 = 1.5625. So square root is 1.25.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.2</span>
+  <div class="q-text">What is the smallest number by which 3600 should be divided to make it a perfect cube?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 45</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 450</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 50</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 300</div>
+  </div>
+  <div class="explanation">3600 = 2^4 * 3^2 * 5^2. To get a cube, divide by 2 * 3^2 * 5^2 = 450.</div>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.3</span>
+  <div class="q-text">A train traveling at 60 km/h crosses a pole in 9 seconds. What is the length of the train?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 120m</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 180m</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 150m</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 200m</div>
+  </div>
+  <div class="explanation">Speed = 60 * 5/18 = 16.67 m/s. Length = 16.67 * 9 = 150m.</div>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.4</span>
+  <div class="q-text">The perimeter of a square is equal to the perimeter of a rectangle with length 12cm and breadth 8cm. Find the area of the square.</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 64 sq cm</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 80 sq cm</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 96 sq cm</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 100 sq cm</div>
+  </div>
+  <div class="explanation">Rect P = 2(20) = 40. Square side = 10. Area = 100.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.5</span>
+  <div class="q-text">If x + 1/x = 5, then x^2 + 1/x^2 = ?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 25</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 23</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 27</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 20</div>
+  </div>
+  <div class="explanation">(x+1/x)^2 = x^2+1/x^2+2. So 25-2 = 23.</div>
+</div>
+
+<!-- ============ PART 2: DATA INTERPRETATION (Q26-45) ============ -->
+<div class="section-divider">
+  <h2>2. Data Interpretation (Charts, Graphs, Tables, Data Sufficiency etc.) - 10th Standard</h2>
+  <span class="badge">Q.26-45</span>
+</div>
+
+<div class="q-context">
+  <strong>DI (Q.26-30): Production of crops in Odisha (in Lakh Tons)</strong>
+  <table style="width:100%; border: 1px solid #333; margin-top: 10px;">
+    <tr><th>Crop</th><th>2022</th><th>2023</th><th>2024</th></tr>
+    <tr><td>Rice</td><td>80</td><td>85</td><td>92</td></tr>
+    <tr><td>Pulses</td><td>20</td><td>22</td><td>25</td></tr>
+    <tr><td>Oilseeds</td><td>15</td><td>18</td><td>21</td></tr>
+  </table>
+</div>
+
+<div class="q-card" data-correct="a">
+  <span class="q-num">Q.26</span>
+  <div class="q-text">Which crop had the highest production growth rate from 2022 to 2023?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Oilseeds</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Rice</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Pulses</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> All same</div>
+  </div>
+  <div class="explanation">Oilseeds: 3/15 = 20%. Pulses: 2/20 = 10%. Rice: 5/80 = 6.25%.</div>
+</div>
+
+<!-- ============ PART 3: LOGICAL REASONING (Q46-75) ============ -->
+<div class="section-divider">
+  <h2>3. Logical Reasoning and Analytical Ability, General Mental Ability</h2>
+  <span class="badge">Q.46-75</span>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.46</span>
+  <div class="q-text">A man walks 5km north, turns right walks 3km, then turns right again and walks 5km. Distance from start?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> 5km</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> 3km</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> 8km</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> 0km</div>
+  </div>
+  <div class="explanation">Forms a rectangle; he is 3km East from start.</div>
+</div>
+
+<!-- ============ PART 4: CURRENT EVENTS (Q76-110) ============ -->
+<div class="section-divider">
+  <h2>4. Current Events of National and International Importance</h2>
+  <span class="badge">Q.76-110</span>
+</div>
+
+<div class="q-card" data-correct="d">
+  <span class="q-num">Q.76</span>
+  <div class="q-text">Chief Guest for Republic Day 2024?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Joe Biden</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Rishi Sunak</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Sisi</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Emmanuel Macron</div>
+  </div>
+  <div class="explanation">French President was the guest.</div>
+</div>
+
+<!-- ============ PART 5: COMPUTER AWARENESS (Q111-125) ============ -->
+<div class="section-divider">
+  <h2>5. Computer/Internet Awareness</h2>
+  <span class="badge">Q.111-125</span>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.111</span>
+  <div class="q-text">Fastest memory of a computer?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> RAM</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Cache</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Registers</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> SSD</div>
+  </div>
+  <div class="explanation">Registers in CPU have the fastest access.</div>
+</div>
+
+<!-- ============ PART 6: ODISHA GK (Q126-150) ============ -->
+<div class="section-divider">
+  <h2>6. Odisha Economy, Odisha History, Odisha Geography, Odisha Heritage and Culture</h2>
+  <span class="badge">Q.126-150</span>
+</div>
+
+<div class="q-card" data-correct="c">
+  <span class="q-num">Q.126</span>
+  <div class="q-text">Highest tribal population district in Odisha (2011)?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Koraput</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Sundargarh</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Mayurbhanj</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Kandhamal</div>
+  </div>
+  <div class="explanation">Mayurbhanj has the highest ST population in Odisha.</div>
+</div>
+
+<div class="q-card" data-correct="b">
+  <span class="q-num">Q.127</span>
+  <div class="q-text">Which king built the Konark Sun Temple?</div>
+  <div class="options">
+    <div class="option" data-opt="a"><span class="opt-letter">A</span> Anantavarman</div>
+    <div class="option" data-opt="b"><span class="opt-letter">B</span> Narasimhadeva I</div>
+    <div class="option" data-opt="c"><span class="opt-letter">C</span> Kapilendra Deva</div>
+    <div class="option" data-opt="d"><span class="opt-letter">D</span> Prataparudra</div>
+  </div>
+  <div class="explanation">Narasimhadeva I of Ganga Dynasty.</div>
+</div>
+
+<div class="controls">
+  <button id="submit-btn" class="btn">Submit Mock Test 3</button>
+</div>
+
+<div id="results" class="score-card">
+  <h2>Performance Report</h2>
+  <div class="big-score" id="score-display">0.00/150</div>
+  <div id="badge-display" style="font-weight: 800; color: #f0883e;"></div>
+</div>
+
+</div>
+
+<div class="footer">
+  &copy; Mock Test 3 Alignment Project · OSSC CGL 2026
+</div>
+
+<script>
+  let timeLeft = 150 * 60;
+  const timerDisplay = document.getElementById('timer');
+  const timerInterval = setInterval(() => {
+    timeLeft--;
+    let h = Math.floor(timeLeft / 3600);
+    let m = Math.floor((timeLeft % 3600) / 60);
+    let s = timeLeft % 60;
+    timerDisplay.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitTest(); }
+  }, 1000);
+
+  document.querySelectorAll('.option').forEach(opt => {
+    opt.addEventListener('click', function() {
+      if(document.getElementById('results').style.display === 'block') return;
+      const parent = this.closest('.q-card');
+      parent.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+
+  document.getElementById('submit-btn').onclick = submitTest;
+
+  function submitTest() {
+    clearInterval(timerInterval);
+    document.getElementById('submit-btn').style.display = 'none';
+    let score = 0;
+    document.querySelectorAll('.q-card').forEach((card) => {
+      const correctOpt = card.getAttribute('data-correct');
+      const selected = card.querySelector('.option.selected');
+      const selectedOpt = selected ? selected.getAttribute('data-opt') : null;
+      card.querySelector(`.option[data-opt="${correctOpt}"]`).classList.add('correct');
+      if (selectedOpt && selectedOpt !== correctOpt) selected.classList.add('wrong');
+      card.querySelectorAll('.explanation').forEach(ex => ex.style.display = 'block');
+      if (selectedOpt === correctOpt) score += 1;
+      else if (selectedOpt) score -= 0.25;
+    });
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('score-display').textContent = `${score.toFixed(2)}/150`;
+    window.scrollTo({ top: 300, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

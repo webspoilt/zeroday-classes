@@ -6,6 +6,7 @@
 <title>Mock Test 2 — OSSC CGL 2026</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,22 +33,26 @@
   }
   .reg-card h2 { color: #f0883e; font-size: 24px; font-weight: 900; margin-bottom: 8px; }
   .reg-card .reg-sub { color: #8b949e; font-size: 14px; margin-bottom: 30px; }
+  .reg-card .login-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+  .reg-card .tab-btn { flex: 1; padding: 10px; background: #0a0a0b; border: 1px solid #30363d; color: #8b949e; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; transition: 0.3s; }
+  .reg-card .tab-btn.active { border-color: #f0883e; color: #f0883e; background: rgba(240,136,62,0.05); }
   .reg-card input {
-    width: 100%; padding: 16px 20px; background: #0a0a0b; border: 1px solid #30363d;
-    border-radius: 12px; color: #fff; font-size: 16px; font-weight: 600;
-    margin-bottom: 20px; transition: 0.3s;
+    width: 100%; padding: 14px 18px; background: #0a0a0b; border: 1px solid #30363d;
+    border-radius: 10px; color: #fff; font-size: 15px; font-weight: 600;
+    margin-bottom: 15px; transition: 0.3s;
   }
   .reg-card input:focus { outline: none; border-color: #f0883e; box-shadow: 0 0 20px rgba(240,136,62,0.15); }
   .reg-card input::placeholder { color: #484f58; }
   .reg-card .start-btn {
-    width: 100%; padding: 18px; background: #f0883e; border: none; color: #000;
-    font-weight: 900; font-size: 16px; border-radius: 30px; cursor: pointer;
-    text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
-    box-shadow: 0 4px 20px rgba(240,136,62,0.3);
+    width: 100%; padding: 16px; background: #f0883e; border: none; color: #000;
+    font-weight: 900; font-size: 15px; border-radius: 30px; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+    box-shadow: 0 4px 20px rgba(240,136,62,0.3); margin-top: 10px;
   }
   .reg-card .start-btn:hover { background: #fff; transform: scale(1.02); }
   .reg-card .start-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .reg-error { color: #ff6b6b; font-size: 13px; margin-bottom: 15px; display: none; }
+  .reg-error { color: #ff6b6b; font-size: 12px; margin-bottom: 15px; display: none; }
+  #otp-section { display: none; }
 
   /* --- MAIN TEST UI --- */
   #test-content { display: none; }
@@ -105,20 +110,50 @@
   .ans-cell.correct { border-color: #3fb950; color: #3fb950; }
   .ans-cell.wrong { border-color: #ff6b6b; color: #ff6b6b; }
   
+  /* --- LEADERBOARD --- */
+  .leaderboard-container { margin-top: 40px; padding: 20px; background: #161b22; border-radius: 12px; border: 1px solid #30363d; }
+  .leaderboard-container h3 { color: #f0883e; margin-bottom: 15px; font-size: 16px; text-transform: uppercase; }
+  .leaderboard-table { width: 100%; border-collapse: collapse; text-align: left; }
+  .leaderboard-table th { color: #8b949e; font-size: 11px; padding: 10px; border-bottom: 1px solid #30363d; }
+  .leaderboard-table td { padding: 12px 10px; border-bottom: 1px solid #21262d; font-size: 13px; }
+  .leaderboard-table .rank { color: #f0883e; font-weight: 900; width: 50px; }
+  .leaderboard-table .name { font-weight: 600; color: #fff; }
+  .leaderboard-table .score { color: #3fb950; font-weight: 700; text-align: right; }
+  .leaderboard-table tr:nth-child(1) .rank { color: #ffd700; }
+  .leaderboard-table tr:nth-child(2) .rank { color: #c0c0c0; }
+  .leaderboard-table tr:nth-child(3) .rank { color: #cd7f32; }
+  
   .footer { text-align: center; padding: 40px; color: #484f58; font-size: 13px; border-top: 1px solid #21262d; margin-top: 50px; }
   @media (max-width: 600px) { .options { grid-template-columns: 1fr; } .ans-grid { grid-template-columns: repeat(5, 1fr); } }
 </style>
 </head>
 <body>
 
-<!-- ========== REGISTRATION SCREEN ========== -->
+<!-- ========== REGISTRATION/LOGIN ========== -->
 <div id="registration-screen">
   <div class="reg-card">
-    <h2>📝 Register to Start</h2>
-    <div class="reg-sub">Enter your full name to begin Mock Test 2. Your name will appear on the PDF report.</div>
-    <div class="reg-error" id="reg-error">Please enter your full name (at least 3 characters).</div>
-    <input type="text" id="student-name-input" placeholder="Enter Your Full Name" autocomplete="name" />
-    <button class="start-btn" id="start-test-btn" disabled onclick="startTest()">🚀 Start Mock Test</button>
+    <h2>📝 Secure Login</h2>
+    <div class="reg-sub">Unlock Mock Test 2. Your ranking and details will be saved to your profile.</div>
+    
+    <div class="login-tabs">
+      <button class="tab-btn active" id="phone-tab" onclick="setAuthMode('phone')">📱 Phone OTP</button>
+      <button class="tab-btn" id="email-tab" onclick="setAuthMode('email')">📧 Email</button>
+    </div>
+
+    <div class="reg-error" id="reg-error"></div>
+
+    <div id="input-section">
+      <input type="text" id="full-name-input" placeholder="Full Name (for Rank/Certificate)" />
+      <input type="tel" id="identifier-input" placeholder="10-digit Phone Number" />
+      <button class="start-btn" id="send-otp-btn" onclick="handleSendOTP()">Get Access OTP</button>
+    </div>
+
+    <div id="otp-section">
+      <div class="reg-sub">Enter the code sent to your <span id="target-type">device</span></div>
+      <input type="text" id="otp-input" placeholder="Enter 6-digit Code" maxlength="6" />
+      <button class="start-btn" id="verify-otp-btn" onclick="handleVerifyOTP()">Verify & Start Test</button>
+      <div class="reg-sub" style="margin-top:15px; cursor:pointer; font-size:12px; text-decoration:underline;" onclick="resetAuthUI()">Back to Details</div>
+    </div>
   </div>
 </div>
 
@@ -1963,6 +1998,170 @@
     document.getElementById('badge-display').textContent = badge;
 
     window.scrollTo({ top: 300, behavior: 'smooth' });
+    
+    // Save to Supabase and show results
+    saveResultToSupabase();
+  }
+
+  // ─── AUTH & LEADERBOARD LOGIC ───
+  const SUPABASE_URL = 'https://xcktxkvfjcclstugjxkg.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_mXAKB5dIl-7QuAm_wwNimA_xJ6806D4';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let authMode = 'phone';
+  let userSession = null;
+
+  async function checkSession() {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      userSession = data.session;
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', userSession.user.id).single();
+      studentName = profile?.full_name || userSession.user.email || 'Student';
+      startTestAuto();
+    }
+  }
+  checkSession();
+
+  function setAuthMode(m) {
+    authMode = m;
+    document.getElementById('phone-tab').className = m === 'phone' ? 'tab-btn active' : 'tab-btn';
+    document.getElementById('email-tab').className = m === 'email' ? 'tab-btn active' : 'tab-btn';
+    document.getElementById('identifier-input').placeholder = m === 'phone' ? '10-digit Phone Number' : 'Enter Email Address';
+    document.getElementById('identifier-input').type = m === 'phone' ? 'tel' : 'email';
+  }
+
+  async function handleSendOTP() {
+    const name = document.getElementById('full-name-input').value.trim();
+    const iden = document.getElementById('identifier-input').value.trim();
+    const errorBar = document.getElementById('reg-error');
+
+    if (name.length < 3) { errorBar.textContent = "Please enter your full name."; errorBar.style.display = 'block'; return; }
+    if (!iden) { errorBar.textContent = "Please enter phone or email."; errorBar.style.display = 'block'; return; }
+
+    const btn = document.getElementById('send-otp-btn');
+    btn.disabled = true; btn.textContent = "Sending...";
+
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: authMode === 'phone' ? '+91' + iden.replace(/\D/g, '').slice(-10) : undefined,
+      email: authMode === 'email' ? iden : undefined,
+    });
+
+    if (error) {
+      errorBar.textContent = error.message; errorBar.style.display = 'block';
+      btn.disabled = false; btn.textContent = "Try Again";
+    } else {
+      document.getElementById('input-section').style.display = 'none';
+      document.getElementById('otp-section').style.display = 'block';
+      document.getElementById('target-type').textContent = authMode === 'phone' ? 'Phone Number' : 'Email';
+    }
+  }
+
+  async function handleVerifyOTP() {
+    const otp = document.getElementById('otp-input').value.trim();
+    const iden = document.getElementById('identifier-input').value.trim();
+    const name = document.getElementById('full-name-input').value.trim();
+    const errorBar = document.getElementById('reg-error');
+
+    if (otp.length < 6) { errorBar.textContent = "Enter 6-digit code."; errorBar.style.display = 'block'; return; }
+
+    const btn = document.getElementById('verify-otp-btn');
+    btn.disabled = true; btn.textContent = "Verifying...";
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone: authMode === 'phone' ? '+91' + iden.replace(/\D/g, '').slice(-10) : undefined,
+      email: authMode === 'email' ? iden : undefined,
+      token: otp,
+      type: authMode === 'phone' ? 'sms' : 'magiclink'
+    });
+
+    if (error) {
+      errorBar.textContent = error.message; errorBar.style.display = 'block';
+      btn.disabled = false; btn.textContent = "Retry OTP";
+    } else if (data.session) {
+      userSession = data.session;
+      studentName = name;
+      // Sync Profile
+      await supabase.from('profiles').upsert({
+        id: userSession.user.id,
+        full_name: name,
+        phone: authMode === 'phone' ? iden : null,
+        email: authMode === 'email' ? iden : null,
+        updated_at: new Date()
+      });
+      startTestAuto();
+    }
+  }
+
+  function startTestAuto() {
+    document.getElementById('registration-screen').style.display = 'none';
+    document.getElementById('test-content').style.display = 'block';
+    document.getElementById('header-student-name').textContent = '👤 ' + studentName;
+    testStartTime = Date.now();
+    startTimer();
+  }
+
+  function startTimer() {
+    const timerDisplay = document.getElementById('timer');
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      let h = Math.floor(timeLeft / 3600);
+      let m = Math.floor((timeLeft % 3600) / 60);
+      let s = timeLeft % 60;
+      timerDisplay.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+      if (timeLeft <= 0) submitTest();
+    }, 1000);
+  }
+
+  async function saveResultToSupabase() {
+    if (!userSession) return;
+    const timeTaken = Math.floor((Date.now() - testStartTime) / 1000);
+    
+    await supabase.from('test_results').insert({
+      user_id: userSession.user.id,
+      test_tag: 'mock_2',
+      score: finalScore,
+      time_taken: timeTaken
+    });
+    
+    fetchLeaderboard();
+  }
+
+  async function fetchLeaderboard() {
+    const { data, error } = await supabase
+      .from('test_results')
+      .select('score, time_taken, profiles(full_name)')
+      .eq('test_tag', 'mock_2')
+      .order('score', { ascending: false })
+      .order('time_taken', { ascending: true })
+      .limit(10);
+
+    if (data) {
+      let lbHTML = `<div class="leaderboard-container">
+        <h3>🏆 Live Mock Leaderboard</h3>
+        <table class="leaderboard-table">
+          <thead><tr><th>Rank</th><th>Candidate Name</th><th style="text-align:right">Score</th></tr></thead>
+          <tbody>`;
+      
+      data.forEach((row, idx) => {
+        const firstName = row.profiles?.full_name?.split(' ')[0] || 'Unknown';
+        lbHTML += `<tr>
+          <td class="rank">#${idx+1}</td>
+          <td class="name">${firstName}</td>
+          <td class="score">${row.score.toFixed(2)}</td>
+        </tr>`;
+      });
+      
+      lbHTML += `</tbody></table></div>`;
+      document.getElementById('results').insertAdjacentHTML('beforeend', lbHTML);
+    }
+  }
+
+  function resetAuthUI() {
+    document.getElementById('input-section').style.display = 'block';
+    document.getElementById('otp-section').style.display = 'none';
+    document.getElementById('reg-error').style.display = 'none';
+    document.getElementById('send-otp-btn').disabled = false;
+    document.getElementById('send-otp-btn').textContent = "Get Access OTP";
   }
 
   // ─── PDF REPORT DOWNLOAD ───

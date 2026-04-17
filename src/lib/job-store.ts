@@ -37,13 +37,27 @@ function rowToJob(row: JobRow): JobPost {
 
 // ─── Read ────────────────────────────────────────
 export async function getJobs(): Promise<JobPost[]> {
+    try {
+        // Try fetching from the local JSON API first (Master List)
+        const response = await fetch('/api/jobs');
+        if (response.ok) {
+            const jobs = await response.json();
+            if (jobs && Array.isArray(jobs) && jobs.length > 0) {
+                return jobs;
+            }
+        }
+    } catch (apiError) {
+        console.warn('API fetch failed, falling back to Supabase:', apiError);
+    }
+
+    // Fallback: Fetch from Supabase
     const { data, error } = await supabase
         .from('job_posts')
         .select('*')
         .order('created_at', { ascending: false });
 
     if (error || !data || data.length === 0) {
-        // Fallback to hardcoded mock data if DB is empty or unavailable
+        // Ultimate fallback to hardcoded mock data
         return JOB_DATA;
     }
     return data.map(rowToJob);

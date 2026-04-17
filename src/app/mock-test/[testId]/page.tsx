@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { Download, Share2, Mail, Loader2, Lock, ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
